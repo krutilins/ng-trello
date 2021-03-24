@@ -26,6 +26,18 @@ import { MatFormFieldModule } from '@angular/material/form-field';
     MatSidenavModule,
     MatToolbarModule,
     MatFormFieldModule,
+  ],
+  exports: [
+    MatCardModule,
+    MatListModule,
+    MatIconModule,
+    DragDropModule,
+    MatInputModule,
+    MatButtonModule,
+    MatDialogModule,
+    MatSidenavModule,
+    MatToolbarModule,
+    MatFormFieldModule,
   ]
 })
 export class SharedModule { }
