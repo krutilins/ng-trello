@@ -2,12 +2,12 @@ import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { AuthService } from 'src/app/core/services/auth.service';
 
 @Component({
-  selector: 'app-sign-up-page',
-  templateUrl: './sign-up-page.component.html',
-  styleUrls: ['./sign-up-page.component.scss'],
+  selector: 'app-verify-email',
+  templateUrl: './verify-email.component.html',
+  styleUrls: ['./verify-email.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class SignUpPageComponent implements OnInit {
+export class VerifyEmailComponent implements OnInit {
 
   constructor(
     public authService: AuthService

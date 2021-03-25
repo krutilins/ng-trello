@@ -1,3 +1,55 @@
 :host {
   display: block;
 }
+
+.form-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background: white;
+  height: 100vh;
+
+  .lock {
+    width: 20%;
+    display: block;
+  }
+
+  .sign-in-methods {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+    align-items: center;
+    border: 1px solid black;
+    min-width: 320px;
+    min-height: 320px;
+    margin: 0px 30%;
+    padding: 10px;
+
+    button {
+      width: 100%;
+      height: 60px;
+    }
+
+    .google {
+      border: 1px solid #95989a;
+      background: #fff url("/assets/images/google.svg") no-repeat 25px;
+      background-size: 25px;
+    }
+
+    .email {
+      background: #ececec url("/assets/images/email.svg") no-repeat 25px;
+      background-size: 25px;
+    }
+
+    @media (max-width: 600px) {
+      .google {
+        background: #fff;
+      }
+
+      .email {
+        background: #ececec;
+      }
+    }
+  }
+}

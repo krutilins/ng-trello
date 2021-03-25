@@ -1,3 +1,60 @@
 :host {
   display: block;
 }
+
+.auth-page {
+  .header {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    height: 100vh;
+    padding: 0px 15%;
+    box-sizing: border-box;
+
+    background: #f2994a; /* fallback for old browsers */
+    background: -webkit-linear-gradient(
+      to right,
+      #f2c94c,
+      #f2994a
+    ); /* Chrome 10-25, Safari 5.1-6 */
+    background: linear-gradient(
+      to right,
+      #f2c94c,
+      #f2994a
+    ); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+
+    .greeting {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-around;
+      align-items: center;
+      height: 10rem;
+
+      .title {
+        box-sizing: border-box;
+        h2 {
+          font-size: 54px;
+          font-weight: 700;
+        }
+      }
+      .subtitle {
+        box-sizing: border-box;
+        h3 {
+          font-size: 24px;
+          font-weight: 400;
+        }
+      }
+    }
+
+    .actions {
+      display: flex;
+      flex-direction: row;
+      justify-content: space-around;
+      width: 100%;
+
+      .action {
+        display: block;
+      }
+    }
+  }
+}

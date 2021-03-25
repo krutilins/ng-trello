@@ -1,4 +1,6 @@
-import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
+import { Router } from '@angular/router';
+import { AuthService } from 'src/app/core/services/auth.service';
 
 @Component({
   selector: 'app-sign-in-page',
@@ -6,11 +8,15 @@ import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
   styleUrls: ['./sign-in-page.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class SignInPageComponent implements OnInit {
+export class SignInPageComponent {
 
-  constructor() { }
+  error: any;
 
-  ngOnInit(): void {
+  constructor(
+    public authService: AuthService
+  ) { }
+
+  signInGoogle(): void {
+
   }
-
 }
