@@ -1,0 +1,16 @@
+<button
+  mat-icon-button
+  class="example-icon"
+  aria-label="Example icon-button with add icon"
+  (click)="openDialog()"
+>
+  <mat-icon>add</mat-icon>
+</button>
+
+<div class="board-list">
+  <ul class="board-list__list">
+    <li class="board-list__item" *ngFor="let boardCard of boardList.boards">
+      <span>{{ boardCard.name }}</span>
+    </li>
+  </ul>
+</div>

@@ -1,0 +1,22 @@
+<div *ngIf="list !== null">
+  <h2 class="title">{{ list.title }}</h2>
+
+  <div class="container">
+    <app-board-card
+      cdkDrag
+      class="card"
+      *ngFor="let card of list.cards; let index = index"
+      [index]="index"
+      listID="{{ list.id }}"
+      [card]="card"
+    >
+    </app-board-card>
+  </div>
+
+  <app-board-action-button
+    *ngIf="handleShowActionButton(list.title)"
+    listID="{{ list.id }}"
+    [cardsLength]="list.cards.length"
+  >
+  </app-board-action-button>
+</div>

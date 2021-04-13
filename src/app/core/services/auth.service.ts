@@ -9,7 +9,7 @@ import { Router } from '@angular/router';
   providedIn: 'root'
 })
 export class AuthService {
-  userData: any; // Save logged in user data
+  userData: firebase.User | null = null; // Save logged in user data
 
   constructor(
     public afs: AngularFirestore,   // Inject Firestore service
@@ -30,6 +30,11 @@ export class AuthService {
         JSON.parse(localStorage.getItem('user') as string);
       }
     });
+  }
+
+  // _userData getter
+  public get firebaseUserData(): firebase.User | null {
+    return this.userData;
   }
 
   // Sign in with email/password

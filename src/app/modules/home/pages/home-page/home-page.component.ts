@@ -1,4 +1,5 @@
 import { Component, ChangeDetectionStrategy } from '@angular/core';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-home-page',
@@ -8,6 +9,10 @@ import { Component, ChangeDetectionStrategy } from '@angular/core';
 })
 export class HomePageComponent {
 
-  constructor() { }
+  constructor(private router: Router) { }
+
+  navigateToAuth(): void {
+    this.router.navigate(['auth']);
+  }
 
 }
