@@ -1,81 +1,161 @@
 import { Injectable } from '@angular/core';
 import { AngularFirestore, AngularFirestoreCollection, AngularFirestoreDocument } from '@angular/fire/firestore';
 import { from, Observable } from 'rxjs';
-import { map, take } from 'rxjs/operators';
-import { BoardCard } from '../models/board-card.model';
-import { BoardList } from '../models/board-list.model';
+import { BoardPreview } from '../models/board-preview.model';
+import { User } from '../models/user.model';
 import { AuthService } from './auth.service';
+import firebase from 'firebase/app';
+import { TaskList } from '../models/task-list.model';
+import { BoardContent } from '../models/board-content.model';
 
 @Injectable({
   providedIn: 'root'
 })
 export class BoardService {
-  usersCollection: AngularFirestoreCollection; // TODO: add type
-  boardListCollection: AngularFirestoreCollection<{ name: string }>;
-  userDocumentReference: AngularFirestoreDocument; // TODO: add type
+  private firebaseUser: firebase.User | null = null;
+  private userDocRef: AngularFirestoreDocument<User> | null = null;
+
+  private usersCollection: AngularFirestoreCollection<User>;
+  private boardsCollection: AngularFirestoreCollection<BoardPreview>;
+  private boardContentCollection: AngularFirestoreCollection<BoardContent>;
 
   constructor(private firestore: AngularFirestore, private authService: AuthService) {
-    this.usersCollection = firestore.collection('users');
-    this.boardListCollection = firestore.collection('boardList');
+    this.usersCollection = this.firestore.collection('users');
+    this.boardsCollection = this.firestore.collection('boards');
+    this.boardContentCollection = this.firestore.collection('taskLists');
 
-    this.userDocumentReference = this.usersCollection.doc(authService.userData?.uid);
+    // tslint:disable-next-line: deprecation
+    this.authService.firebaseUserData.subscribe(firebaseUser => {
+      this.firebaseUser = firebaseUser;
+      if (this.firebaseUser) {
+        this.userDocRef = this.usersCollection.doc(this.firebaseUser.uid);
+      }
+    });
 
-    this.userDocumentReference
-      .get()
-      .pipe(
-        map(doc => {
-          if (!doc.exists) {
-            this.usersCollection
-              .doc(authService.userData?.uid)
-              .set({ availableBoards: [] }); // TODO: i'm not sure that I can set property manually
-          }
-        })
-      );
   }
 
-  loadBoardList(): Observable<BoardList | []> {
+  public createBoard(name: string): Observable<BoardPreview> {
     return from(
-      new Promise<BoardList>((resolve, reject) => {
-        const boardList: BoardList = {
-          boards: []
-        };
+      new Promise<BoardPreview>((resolve, reject) => {
+        const firebaseUser = this.firebaseUser;
+        const userDocRef = this.userDocRef;
 
-        this.boardListCollection.get().forEach(querySnapshot => {
-          querySnapshot.forEach(doc => boardList.boards.push({ name: doc.data().name, uid: doc.id }));
-        });
+        if (firebaseUser && userDocRef) {
+          const boardId = this.firestore.createId();
 
-        resolve(boardList);
-      }).then(
-        boardList => boardList,
-        error => error
-      )
-    );
-  }
+          const board: BoardPreview = {
+            id: boardId,
+            name,
+            owner: firebaseUser.uid,
+            admins: [firebaseUser.uid],
+            members: [firebaseUser.uid],
+            boardContentId: boardId
+          };
+          this.boardsCollection.doc(boardId).set(board).then(
+            () => {
 
-  createBoard(name: string): Observable<BoardCard> {
-    return from(
-      new Promise<BoardCard>((resolve, reject) => {
-        this.boardListCollection
-          .add({ name })
-          .then(
-            docRef => docRef.get().then(docSnapshot => resolve({ name: docSnapshot.data()?.name, uid: docSnapshot.id })),
-            error => reject(error)
+              userDocRef.get().forEach(userDocSnapshot => {
+                const userData = userDocSnapshot.data();
+
+                if (userData) {
+                  const boardsIds = userData.idBoards || [];
+                  userDocRef.update({
+                    idBoards: [...boardsIds, boardId]
+                  }).then(() => resolve(board));
+                } else {
+                  reject();
+                }
+              });
+            }
+          ).catch(
+            (reason) => {
+              this.boardsCollection.doc(boardId).delete();
+              reject(reason);
+            }
           );
+        } else {
+          reject();
+        }
       })
     );
   }
 
-  deleteBoard(uid: string): Observable<boolean> {
+  public deleteBoard(id: string): Observable<boolean> {
     return from(
       new Promise<boolean>((resolve, reject) => {
-        this.boardListCollection
-          .doc(uid)
-          .delete().then(
-            () => resolve(true),
-            () => reject(false)
-          );
+        this.boardsCollection.doc(id).delete().then(
+          () => resolve(true),
+          () => reject(false)
+        );
       })
     );
   }
 
+  public loadBoard(boardId: string): Observable<BoardContent> {
+    return from(
+      new Promise<BoardContent>((resolve, reject) => {
+        this.boardContentCollection.doc(boardId).get().forEach(boardContentDocSnapshot => {
+          if (boardContentDocSnapshot.exists) {
+            const boardContentData = boardContentDocSnapshot.data();
+            if (boardContentData) {
+              resolve(boardContentData);
+            }
+          } else {
+            const newBoardContent = {
+              id: boardId,
+              taskLists: []
+            };
+
+            boardContentDocSnapshot.ref.set(newBoardContent);
+            resolve(newBoardContent);
+          }
+        }).catch((reason) => reject(reason));
+      })
+    );
+  }
+
+  public loadPreviewBoardList(): Observable<BoardPreview[]> {
+    return from(
+      new Promise<BoardPreview[]>((resolve, reject) => {
+        const userDocRef = this.userDocRef;
+
+        if (userDocRef) {
+          let boardList: BoardPreview[] = [];
+
+          userDocRef.get().forEach(userDocSnapshot => {
+            const userData = userDocSnapshot.data();
+            const promises: Promise<void>[] = [];
+            if (userData) {
+              userData.idBoards.forEach(boardId => {
+                promises.push(
+                  this.boardsCollection.doc(boardId).get().forEach(boardDocSnapshot => {
+                    const boardData = boardDocSnapshot.data();
+                    if (boardData) {
+                      boardList = [...boardList, boardData];
+                    }
+                  })
+                );
+              });
+              Promise.all(promises).then(() => resolve(boardList));
+            }
+          }).catch(reason => reject(reason));
+        } else {
+          reject();
+        }
+      })
+    );
+  }
+
+  public updateBoardContent(boardContent: BoardContent): Observable<BoardContent> {
+    return from(
+      new Promise<BoardContent>((resolve, reject) => {
+        this.boardContentCollection.doc(boardContent.id).update({
+          taskLists: boardContent.taskLists
+        }).then(
+          () => resolve(boardContent),
+          errorMessage => reject({ errorMessage })
+        );
+      })
+    );
+  }
 }

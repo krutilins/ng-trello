@@ -1,5 +1,6 @@
-import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 import { AuthService } from 'src/app/core/services/auth.service';
+import firebase from 'firebase/app';
 
 @Component({
   selector: 'app-verify-email',
@@ -9,11 +10,19 @@ import { AuthService } from 'src/app/core/services/auth.service';
 })
 export class VerifyEmailComponent implements OnInit {
 
+  public firebaseUser: firebase.User | null = null;
+
   constructor(
-    public authService: AuthService
+    private authService: AuthService,
+    private changeDetectorRef: ChangeDetectorRef
   ) { }
 
   ngOnInit(): void {
+    // tslint:disable-next-line: deprecation
+    this.authService.firebaseUserData.subscribe(firebaseUser => this.firebaseUser = firebaseUser);
   }
 
+  onSendVerificationEmail(): void {
+    this.authService.sendVerificationMail();
+  }
 }

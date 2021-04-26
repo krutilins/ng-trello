@@ -9,9 +9,9 @@ import { BoardCardComponent } from './components/board-card/board-card.component
 import { BoardCreationDialogComponent } from './components/board-creation-dialog/board-creation-dialog.component';
 import { DashboardComponent } from './pages/dashboard/dashboard.component';
 import { ReactiveFormsModule } from '@angular/forms';
-import { BoardActionButtonComponent } from './components/board-action-button/board-action-button.component';
-import { CardListComponent } from './components/card-list/card-list.component';
-import { CardCreationDialogComponent } from './components/card-creation-dialog/card-creation-dialog.component';
+import { TaskListComponent } from './components/task-list/task-list.component';
+import { TaskCreationDialogComponent } from './components/task-creation-dialog/task-creation-dialog.component';
+import { TaskListCreationalDialogComponent } from './components/task-list-creational-dialog/task-list-creational-dialog.component';
 
 @NgModule({
   declarations: [
@@ -20,9 +20,9 @@ import { CardCreationDialogComponent } from './components/card-creation-dialog/c
     BoardComponent,
     BoardCardComponent,
     BoardCreationDialogComponent,
-    BoardActionButtonComponent,
-    CardListComponent,
-    CardCreationDialogComponent
+    TaskListComponent,
+    TaskCreationDialogComponent,
+    TaskListCreationalDialogComponent
   ],
   imports: [
     CommonModule,

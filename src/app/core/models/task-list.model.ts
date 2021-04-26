@@ -4,4 +4,5 @@ export interface TaskList {
   id: string;
   name: string;
   tasks: Task[];
+  parentBoardId: string;
 }

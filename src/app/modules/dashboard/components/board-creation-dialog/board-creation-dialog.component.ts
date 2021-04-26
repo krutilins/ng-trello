@@ -1,8 +1,8 @@
 import { Store } from '@ngrx/store';
 import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { addBoard } from 'src/app/core/store/actions/board-list.actions';
-import { AppState } from 'src/app/core/store';
+import { AppState } from 'src/app/core/store/models/app-state.model';
+import * as BoardActions from 'src/app/core/store/actions/board.actions';
 
 
 @Component({
@@ -12,7 +12,7 @@ import { AppState } from 'src/app/core/store';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class BoardCreationDialogComponent {
-  boardForm: FormGroup;
+  public boardForm: FormGroup;
 
   constructor(private formBuilder: FormBuilder, private store: Store<AppState>) {
     this.boardForm = this.formBuilder.group({
@@ -20,9 +20,9 @@ export class BoardCreationDialogComponent {
     });
   }
 
-  onCreate(): void {
+  public onCreate(): void {
     if (this.boardForm.dirty && this.boardForm.valid) {
-      this.store.dispatch(addBoard({ name: this.boardForm.value.name }));
+      this.store.dispatch(BoardActions.boardCreate({ name: this.boardForm.value.name }));
     }
   }
 

@@ -1,9 +1,15 @@
 import { CdkDragDrop, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
-import { Component, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ChangeDetectionStrategy, ChangeDetectorRef, OnDestroy, OnInit } from '@angular/core';
+import { MatDialog } from '@angular/material/dialog';
+import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs';
-import { Column } from 'src/app/core/models/column.model';
-import * as CardActions from 'src/app/core/store/actions/card.actions';
+import { Subscription } from 'rxjs';
+import { BoardContent } from 'src/app/core/models/board-content.model';
+import { TaskList } from 'src/app/core/models/task-list.model';
+import * as BoardActions from 'src/app/core/store/actions/board.actions';
+import { AppState } from 'src/app/core/store/models/app-state.model';
+import { selectBoardContent } from 'src/app/core/store/selectors/board.selectors';
+import { TaskListCreationalDialogComponent } from '../task-list-creational-dialog/task-list-creational-dialog.component';
 
 @Component({
   selector: 'app-board',
@@ -11,21 +17,70 @@ import * as CardActions from 'src/app/core/store/actions/card.actions';
   styleUrls: ['./board.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class BoardComponent {
+export class BoardComponent implements OnInit, OnDestroy {
 
-  board: Observable<{ lists: Column[] }>;
+  public boardContent: BoardContent | null = null;
 
-  constructor(private store: Store<{ board: { lists: Column[] } }>) {
-    this.board = this.store.select('board');
-    console.log(this.board);
+  private subscriptions: Subscription[] = [];
+
+  constructor(
+    private store: Store<AppState>,
+    private changeDetectorRef: ChangeDetectorRef,
+    private activatedRoute: ActivatedRoute,
+    public dialog: MatDialog
+  ) {
+    this.subscriptions.push(
+      // tslint:disable-next-line: deprecation
+      this.activatedRoute.paramMap.subscribe(param => {
+        const id = param.get('id');
+        if (id) {
+          this.store.dispatch(BoardActions.boardLoad({ boardId: id }));
+        }
+      })
+    );
   }
 
-  dragCard(
+  public ngOnInit(): void {
+    this.subscriptions.push(
+      // tslint:disable-next-line: deprecation
+      this.store.select(selectBoardContent).subscribe(boardState => {
+        this.boardContent = boardState.boardContent;
+        this.changeDetectorRef.detectChanges();
+      })
+    );
+  }
+
+  public ngOnDestroy(): void {
+    this.subscriptions.forEach(subscription => {
+      if (subscription && subscription.unsubscribe) {
+        subscription.unsubscribe();
+      }
+    });
+  }
+
+  public updateTaskList(): void {
+    this.openDialog();
+  }
+
+  public openDialog(): void {
+    this.dialog.open(TaskListCreationalDialogComponent, {
+      width: '500px',
+      data: {
+        taskListName: '',
+        type: BoardActions.taskListCreate.type,
+        taskListId: '',
+        tasks: []
+      }
+    });
+  }
+
+  public dragCard(
     droppableIdStart: string,
     droppableIdEnd: string,
     droppableIndexStart: number,
-    droppableIndexEnd: number): void {
-    this.store.dispatch(CardActions.dragCard({
+    droppableIndexEnd: number
+  ): void {
+    this.store.dispatch(BoardActions.taskDrag({
       droppableIdStart,
       droppableIdEnd,
       droppableIndexStart,
@@ -33,7 +88,7 @@ export class BoardComponent {
     }));
   }
 
-  drop(event: CdkDragDrop<Column>): void {
+  public drop(event: CdkDragDrop<TaskList>): void {
     const previousContainer = event.previousContainer;
     const currentContainer = event.container;
     const previousIndex = event.previousIndex;
@@ -41,7 +96,7 @@ export class BoardComponent {
 
     if (previousContainer === currentContainer) {
       moveItemInArray(
-        [...currentContainer.data.cards],
+        [...currentContainer.data.tasks],
         previousIndex,
         currentIndex
       );
@@ -54,8 +109,8 @@ export class BoardComponent {
       );
     } else {
       transferArrayItem(
-        [...previousContainer.data.cards],
-        [...currentContainer.data.cards],
+        [...previousContainer.data.tasks],
+        [...currentContainer.data.tasks],
         previousIndex,
         currentIndex
       );

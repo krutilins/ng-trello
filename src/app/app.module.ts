@@ -17,8 +17,10 @@ import { AngularFireAuthModule } from '@angular/fire/auth';
 import { AngularFirestoreModule } from '@angular/fire/firestore';
 import { AngularFireStorageModule } from '@angular/fire/storage';
 import { EffectsModule } from '@ngrx/effects';
-import { BoardEffects } from './core/store/effects/board-list.effects';
-import { reducer } from './core/store/reducers/card.reducer';
+import { BoardEffects } from './core/store/effects/board.effects';
+import { reducer } from './core/store';
+import { StoreDevtoolsModule } from '@ngrx/store-devtools';
+// import { reducer } from './core/store/reducers/card.reducer';
 
 @NgModule({
   declarations: [
@@ -30,15 +32,17 @@ import { reducer } from './core/store/reducers/card.reducer';
     AppRoutingModule,
     ReactiveFormsModule,
     BrowserAnimationsModule,
-    StoreModule.forRoot({
-      board: reducer
-    }),
+    StoreModule.forRoot(reducer),
     // Firebase modules
     AngularFireAuthModule,
     AngularFirestoreModule,
     AngularFireStorageModule,
     AngularFireModule.initializeApp(environment.firebase),
-    EffectsModule.forRoot([BoardEffects])
+    EffectsModule.forRoot([BoardEffects]),
+    StoreDevtoolsModule.instrument({
+      maxAge: 25, // Retains last 25 states
+      logOnly: environment.production, // Restrict extension to log-only mode
+    }),
   ],
   providers: [],
   bootstrap: [AppComponent]

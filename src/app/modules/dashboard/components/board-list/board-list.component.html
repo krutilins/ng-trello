@@ -1,16 +1,24 @@
-<button
-  mat-icon-button
-  class="example-icon"
-  aria-label="Example icon-button with add icon"
-  (click)="openDialog()"
->
-  <mat-icon>add</mat-icon>
-</button>
+<div class="board-preview-list">
+  <ul class="board-preview-list__list">
+    <ng-container *ngIf="boardPreviewList">
+      <li
+        class="board-preview-list__item"
+        *ngFor="let boardPreview of boardPreviewList"
+        (click)="openBoard(boardPreview.boardContentId)"
+      >
+        <span>{{ boardPreview.name }}</span>
+      </li>
+    </ng-container>
 
-<div class="board-list">
-  <ul class="board-list__list">
-    <li class="board-list__item" *ngFor="let boardCard of boardList.boards">
-      <span>{{ boardCard.name }}</span>
+    <li class="board-preview-list__item">
+      <button
+        mat-icon-button
+        class="icon"
+        aria-label="Icon-button with add icon"
+        (click)="openBoardCreationalDialog()"
+      >
+        <mat-icon>add</mat-icon>
+      </button>
     </li>
   </ul>
 </div>

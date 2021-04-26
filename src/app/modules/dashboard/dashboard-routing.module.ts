@@ -9,12 +9,13 @@ const routes: Routes = [
     path: '',
     children: [
       {
-        path: 'board',
+        path: 'board/:id',
         component: BoardComponent
       },
       {
         path: '',
         component: BoardListComponent,
+        pathMatch: 'full'
       }
     ],
     component: DashboardComponent

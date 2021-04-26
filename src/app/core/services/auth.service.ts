@@ -1,132 +1,131 @@
 import { Injectable, NgZone } from '@angular/core';
-import { User } from '../models/user';
 import firebase from 'firebase/app';
 import { AngularFireAuth } from '@angular/fire/auth';
-import { AngularFirestore, AngularFirestoreDocument } from '@angular/fire/firestore';
+import { AngularFirestore } from '@angular/fire/firestore';
 import { Router } from '@angular/router';
+import { User } from '../models/user.model';
+import { BehaviorSubject, Subject } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
-  userData: firebase.User | null = null; // Save logged in user data
+  public firebaseUser$ = new BehaviorSubject<firebase.User | null>(null);
+  private userLocalStorageKey = 'user';
 
   constructor(
-    public afs: AngularFirestore,   // Inject Firestore service
-    public afAuth: AngularFireAuth, // Inject Firebase auth service
+    public afs: AngularFirestore,
+    public afAuth: AngularFireAuth,
     public router: Router,
-    public ngZone: NgZone // NgZone service to remove outside scope warning
+    public ngZone: NgZone
   ) {
-    /* Saving user data in localstorage when
-    logged in and setting up null when logged out */
     // tslint:disable-next-line: deprecation
-    this.afAuth.authState.subscribe(user => {
-      if (user) {
-        this.userData = user;
-        localStorage.setItem('user', JSON.stringify(this.userData));
-        JSON.parse(localStorage.getItem('user') as string);
-      } else {
-        localStorage.setItem('user', String(null));
-        JSON.parse(localStorage.getItem('user') as string);
+    const userJson = localStorage.getItem(this.userLocalStorageKey);
+    if (userJson && JSON.parse(userJson)) {
+      this.firebaseUser$.next(JSON.parse(userJson));
+    }
+
+    // tslint:disable-next-line: deprecation
+    this.afAuth.authState.subscribe(firebaseUser => {
+      if (firebaseUser) {
+        this.firebaseUser$.next(firebaseUser);
+        localStorage.setItem(this.userLocalStorageKey, JSON.stringify(firebaseUser));
       }
     });
   }
 
-  // _userData getter
-  public get firebaseUserData(): firebase.User | null {
-    return this.userData;
+  get firebaseUserData(): BehaviorSubject<firebase.User | null> {
+    return this.firebaseUser$;
   }
 
-  // Sign in with email/password
-  signIn(email: string, password: string): Promise<void> {
+  get isLoggedIn(): boolean {
+    const user = localStorage.getItem(this.userLocalStorageKey);
+    if (user) {
+      return Boolean(JSON.parse(user)?.emailVerified);
+    }
+    return false;
+  }
+
+  public signIn(email: string, password: string): Promise<void> {
     return this.afAuth.signInWithEmailAndPassword(email, password)
       .then((result) => {
         this.ngZone.run(() => {
           this.router.navigate(['dashboard']);
         });
-        this.setUserData(result.user as User);
+        if (result.user) {
+          this.setUserData(result.user);
+        } // TODO: add throw error in else block
       }).catch((error) => {
-        window.alert(error.message);
+        window.alert(error.message); // TODO: delete alert method
       });
   }
 
-  // Sign up with email/password
-  signUp(email: string, password: string): Promise<void> {
+  public signUp(email: string, password: string): Promise<void> {
     return this.afAuth.createUserWithEmailAndPassword(email, password)
       .then((result) => {
-        /* Call the SendVerificaitonMail() function when new user sign
-        up and returns promise */
         this.sendVerificationMail();
-        this.setUserData(result.user as User);
+        if (result.user) {
+          this.setUserData(result.user);
+        } // TODO: add throw error in else block
       }).catch((error) => {
-        window.alert(error.message);
+        window.alert(error.message); // TODO: delete alert method
       });
   }
 
-  // Send email verfificaiton when new user sign up
-  sendVerificationMail(): Promise<void> | undefined {
-    return firebase.auth().currentUser?.sendEmailVerification()
-      .then(() => {
-        this.router.navigate(['verify-email-address']);
-      });
-  }
-
-  // Reset Forggot password
-  forgotPassword(passwordResetEmail: string): Promise<void> {
-    return this.afAuth.sendPasswordResetEmail(passwordResetEmail)
-      .then(() => {
-        window.alert('Password reset email sent, check your inbox.');
-      }).catch((error) => {
-        window.alert(error);
-      });
-  }
-
-  // Returns true when user is looged in and email is verified
-  get isLoggedIn(): boolean {
-    const user = JSON.parse(localStorage.getItem('user') as string);
-    return (user !== null && user.emailVerified !== false) ? true : false;
-  }
-
-  // Sign in with Google
-  googleAuth(): Promise<void> {
-    return this.authLogin(new firebase.auth.GoogleAuthProvider());
-  }
-
-  // Auth logic to run auth providers
-  authLogin(provider: firebase.auth.AuthProvider): Promise<void> {
-    return this.afAuth.signInWithPopup(provider)
-      .then((result) => {
-        this.ngZone.run(() => {
-          this.router.navigate(['dashboard']);
-        });
-        this.setUserData(result.user as User);
-      }).catch((error) => {
-        window.alert(error);
-      });
-  }
-
-  /* Setting up user data when sign in with username/password,
-  sign up with username/password and sign in with social auth
-  provider in Firestore database using AngularFirestore + AngularFirestoreDocument service */
-  setUserData(user: User): Promise<void> {
-    const userRef: AngularFirestoreDocument<any> = this.afs.doc(`users/${user.uid}`);
-    const userData: User = {
-      uid: user.uid,
-      email: user.email,
-      displayName: user.displayName,
-      photoURL: user.photoURL,
-      emailVerified: user.emailVerified
-    };
-    return userRef.set(userData, {
-      merge: true
+  public signOut(): Promise<void> {
+    return this.afAuth.signOut().then(() => {
+      localStorage.removeItem(this.userLocalStorageKey); // TODO: make constant
+      this.router.navigate(['sign-in']); // TODO: should I implement redirect in the service?
     });
   }
 
-  // Sign out
-  signOut(): Promise<void> {
-    return this.afAuth.signOut().then(() => {
-      localStorage.removeItem('user');
-      this.router.navigate(['sign-in']);
+  public forgotPassword(passwordResetEmail: string): Promise<void> {
+    return this.afAuth.sendPasswordResetEmail(passwordResetEmail);
+  }
+
+  public googleAuth(): Promise<void> {
+    return this.authLogin(new firebase.auth.GoogleAuthProvider());
+  }
+
+  private authLogin(provider: firebase.auth.AuthProvider): Promise<void> {
+    return this.afAuth.signInWithPopup(provider)
+      .then((result) => {
+        this.ngZone.run(() => { /// TODO: what is it for?
+          this.router.navigate(['dashboard']); // TODO: should I implement redirect in the service?
+        });
+        if (result.user) {
+          this.setUserData(result.user);
+        } // TODO: add throw error in else block
+      }).catch((error) => {
+        window.alert(error); // TODO: delete alert
+      });
+  }
+
+  public sendVerificationMail(): Promise<void> | undefined {
+    return firebase.auth().currentUser?.sendEmailVerification()
+      .then(() => {
+        this.router.navigate(['verify-email-address']); // TODO: change this part of code
+      });
+  }
+
+  private setUserData(firebaseUser: firebase.User): Promise<void> {
+    return this.afs.collection<User>('users').doc(firebaseUser.uid).get().forEach(userDocSnapshot => {
+      const userData = {
+        id: firebaseUser.uid,
+        email: firebaseUser.email,
+        displayName: firebaseUser.displayName,
+        photoURL: firebaseUser.photoURL,
+        emailVerified: firebaseUser.emailVerified
+      };
+
+      if (userDocSnapshot.exists) {
+        userDocSnapshot.ref.update(userData);
+      } else {
+        userDocSnapshot.ref.set({
+          ...userData,
+          idBoards: []
+        });
+      }
     });
   }
 }

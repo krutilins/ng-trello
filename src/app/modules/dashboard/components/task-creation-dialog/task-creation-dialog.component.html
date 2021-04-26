@@ -1,8 +1,5 @@
 <div class="root">
-  <button
-    mat-button
-    class="close-button"
-    (click)="onClose()">
+  <button mat-button class="close-button" (click)="onClose()">
     <mat-icon>close</mat-icon>
   </button>
 
@@ -16,7 +13,8 @@
         [formControl]="titleFormControl"
         [errorStateMatcher]="errorMatcher"
         value="{{ data.title }}"
-        (input)="onInputChange('title', $event.target)">
+        (input)="onInputChange('title', $event.target)"
+      />
       <mat-error *ngIf="titleFormControl.hasError('required')">
         Enter a card title!
       </mat-error>
@@ -27,14 +25,15 @@
       <textarea
         matInput
         placeholder="Enter a card text"
-        [formControl]="textFormControl"
+        [formControl]="descriptionFormControl"
         [errorStateMatcher]="errorMatcher"
-        value="{{ data.text }}"
-        (input)="onInputChange('text', $event.target)"
+        value="{{ data.description }}"
+        (input)="onInputChange('description', $event.target)"
         cdkTextareaAutosize
         cdkAutosizeMinRows="1"
-        cdkAutosizeMaxRows="10"></textarea>
-      <mat-error *ngIf="textFormControl.hasError('required')">
+        cdkAutosizeMaxRows="10"
+      ></textarea>
+      <mat-error *ngIf="descriptionFormControl.hasError('required')">
         Enter a card text!
       </mat-error>
     </mat-form-field>
@@ -46,16 +45,14 @@
       class="btn"
       color="warn"
       [disabled]="handleDisableDeleteButton()"
-      (click)="handleDeleteCard()">
+      (click)="handleDeleteTask()"
+    >
       <mat-icon>delete</mat-icon>
       Delete
     </button>
 
     <div>
-      <button
-        mat-button
-        class="btn"
-        (click)="onClose()">
+      <button mat-button class="btn" (click)="onClose()">
         <mat-icon>cancel</mat-icon>
         Cancel
       </button>
@@ -65,7 +62,8 @@
         class="btn"
         color="primary"
         [disabled]="handleDisableSaveButton()"
-        (click)="handleModalAction()">
+        (click)="handleModalAction()"
+      >
         <mat-icon>save</mat-icon>
         Save
       </button>

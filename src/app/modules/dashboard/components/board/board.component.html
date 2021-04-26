@@ -1,13 +1,21 @@
 <div class="container">
   <div cdkDropListGroup class="row">
-    <app-card-list
-      cdkDropList
-      class="list"
-      *ngFor="let list of (board | async)?.lists"
-      [cdkDropListData]="list"
-      (cdkDropListDropped)="drop($event)"
-      [list]="list"
-    >
-    </app-card-list>
+    <ng-container *ngIf="boardContent !== null">
+      <app-task-list
+        cdkDropList
+        class="list"
+        *ngFor="let taskList of boardContent.taskLists"
+        [cdkDropListData]="taskList"
+        (cdkDropListDropped)="drop($event)"
+        [list]="taskList"
+      >
+      </app-task-list>
+    </ng-container>
+    <div class="list">
+      <button mat-button class="btn" color="primary" (click)="updateTaskList()">
+        <mat-icon>add</mat-icon>
+        Add task list
+      </button>
+    </div>
   </div>
 </div>

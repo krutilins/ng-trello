@@ -1,0 +1,19 @@
+<div *ngIf="list !== null">
+  <h2 class="title">{{ list.name }}</h2>
+
+  <div class="container">
+    <app-board-card
+      cdkDrag
+      class="card"
+      *ngFor="let task of list.tasks; let index = index"
+      [index]="index"
+      [task]="task"
+    >
+    </app-board-card>
+  </div>
+
+  <button mat-button class="btn" color="primary" (click)="updateCard()">
+    <mat-icon>add</mat-icon>
+    {{ getText() }}
+  </button>
+</div>
