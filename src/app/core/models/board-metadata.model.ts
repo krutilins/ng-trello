@@ -1,8 +1,8 @@
-export interface BoardPreview {
+export interface BoardMetadata {
   id: string;
   name: string;
   owner: string;
   admins: string[];
   members: string[];
-  boardContentId: string;
+  taskListsIds: string[];
 }

@@ -3,8 +3,8 @@ import firebase from 'firebase/app';
 import { AngularFireAuth } from '@angular/fire/auth';
 import { AngularFirestore } from '@angular/fire/firestore';
 import { Router } from '@angular/router';
-import { User } from '../models/user.model';
-import { BehaviorSubject, Subject } from 'rxjs';
+import { UserMetadata } from '../models/user-metadata.model';
+import { BehaviorSubject } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -109,7 +109,7 @@ export class AuthService {
   }
 
   private setUserData(firebaseUser: firebase.User): Promise<void> {
-    return this.afs.collection<User>('users').doc(firebaseUser.uid).get().forEach(userDocSnapshot => {
+    return this.afs.collection<UserMetadata>('users').doc(firebaseUser.uid).get().forEach(userDocSnapshot => {
       const userData = {
         id: firebaseUser.uid,
         email: firebaseUser.email,
@@ -122,8 +122,7 @@ export class AuthService {
         userDocSnapshot.ref.update(userData);
       } else {
         userDocSnapshot.ref.set({
-          ...userData,
-          idBoards: []
+          ...userData
         });
       }
     });
