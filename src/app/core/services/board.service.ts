@@ -2,7 +2,6 @@ import { Injectable } from '@angular/core';
 import { AngularFirestore, AngularFirestoreCollection } from '@angular/fire/firestore';
 import { from, Observable } from 'rxjs';
 import { AuthService } from './auth.service';
-import firebase from 'firebase/app';
 import { v4 as uuid } from 'uuid';
 import { Task } from '../models/task.model';
 import { BoardMetadata } from '../models/board-metadata.model';
@@ -130,7 +129,7 @@ export class BoardService {
             taskListsDeleting.push(
               this.taskListsCollection.doc(taskListId).get().forEach(taskListSnapshot => {
                 const taskListData = taskListSnapshot.data();
-                const tasksDeleting: Promise<void>[] = []
+                const tasksDeleting: Promise<void>[] = [];
 
                 if (taskListData) {
                   taskListData.tasksIds.forEach(taskId => tasksDeleting.push(
