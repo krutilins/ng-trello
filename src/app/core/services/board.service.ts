@@ -7,13 +7,16 @@ import { v4 as uuid } from 'uuid';
 import { Task } from '../models/task.model';
 import { BoardMetadata } from '../models/board-metadata.model';
 import { TaskListMetadata } from '../models/task-list-metadata.model';
+import { UserMetadata } from '../models/user-metadata.model';
+import { BoardContent } from '../models/board-content.model';
 
 @Injectable({
   providedIn: 'root'
 })
 export class BoardService {
-  private firebaseUser: firebase.User | null = null;
+  private userMetadata: UserMetadata | null = null;
 
+  private usersCollection: AngularFirestoreCollection<UserMetadata>;
   private boardsCollection: AngularFirestoreCollection<BoardMetadata>;
   private taskListsCollection: AngularFirestoreCollection<TaskListMetadata>;
   private tasksCollection: AngularFirestoreCollection<Task>;
@@ -24,10 +27,19 @@ export class BoardService {
     this.boardsCollection = this.firestore.collection('boards');
     this.taskListsCollection = this.firestore.collection('taskLists');
     this.tasksCollection = this.firestore.collection('tasks');
+    this.usersCollection = this.firestore.collection('users');
 
     // tslint:disable-next-line: deprecation
-    this.authService.firebaseUserData.subscribe(firebaseUser => {
-      this.firebaseUser = firebaseUser;
+    this.authService.firebaseUserMetadata.subscribe(firebaseUser => {
+      if (firebaseUser) {
+        this.usersCollection.doc(firebaseUser.uid).get().forEach(userSnapshot => {
+          const userData = userSnapshot.data();
+
+          if (userData) {
+            this.userMetadata = userData;
+          }
+        });
+      }
     });
 
   }
@@ -35,9 +47,9 @@ export class BoardService {
   public createBoardMetadata(name: string): Observable<BoardMetadata> {
     return from(
       new Promise<BoardMetadata>((resolve, reject) => {
-        const firebaseUser = this.firebaseUser;
+        const userMetadata = this.userMetadata;
 
-        if (firebaseUser == null) {
+        if (userMetadata == null) {
           return reject();
         }
 
@@ -46,9 +58,9 @@ export class BoardService {
         const newBoardMetadata: BoardMetadata = {
           id: boardId,
           name,
-          owner: firebaseUser.uid,
-          admins: [firebaseUser.uid],
-          members: [firebaseUser.uid],
+          owner: userMetadata.id,
+          admins: [userMetadata.id],
+          members: [userMetadata.id],
           taskListsIds: []
         };
 
@@ -102,43 +114,43 @@ export class BoardService {
     );
   }
 
-  public deleteBoardMetadata(id: string): Observable<string> {
+  public deleteBoardMetadata(boardId: string): Observable<BoardMetadata> {
     return from(
-      new Promise<string>((resolve, reject) => {
-        const taskListSnapshotQuery = this.firestore.collection<TaskListMetadata>(
-          'taskLists',
-          ref => ref.where('boardId', '==', id)
-        ).get();
+      new Promise<BoardMetadata>((resolve, reject) => {
+        this.boardsCollection.doc(boardId).get().forEach(boardSnapshot => {
+          const boardData = boardSnapshot.data();
 
-        const taskListDeleting: Promise<void>[] = [];
+          if (!boardData) {
+            return reject();
+          }
 
-        taskListDeleting.push(
-          taskListSnapshotQuery.forEach(taskListReference => {
-            taskListReference.forEach(taskListSnapshot => {
-              const taskListData: TaskListMetadata = taskListSnapshot.data();
-              const taskDeleting: Promise<void>[] = [];
+          const taskListsDeleting: Promise<void>[] = [];
 
-              if (taskListData) {
-                taskListData.tasksIds.forEach(taskId => taskDeleting.push(
-                  this.tasksCollection.doc(taskId).delete())
+          boardData.taskListsIds.forEach(taskListId => {
+            taskListsDeleting.push(
+              this.taskListsCollection.doc(taskListId).get().forEach(taskListSnapshot => {
+                const taskListData = taskListSnapshot.data();
+                const tasksDeleting: Promise<void>[] = []
+
+                if (taskListData) {
+                  taskListData.tasksIds.forEach(taskId => tasksDeleting.push(
+                    this.tasksCollection.doc(taskId).delete())
+                  );
+                }
+
+                Promise.all(tasksDeleting).then(
+                  () => taskListSnapshot.ref.delete()
                 );
-              }
+              })
+            );
+          });
 
-              Promise.all(taskDeleting).then(
-                () => taskListSnapshot.ref.delete()
-              );
-            });
-          })
-        );
-
-        Promise.all(taskListDeleting).then(
-          () => this.boardsCollection.doc(id).delete()
-        ).then(
-          () => resolve(id)
-        ).catch(
-          () => reject()
-        );
-
+          Promise.all(taskListsDeleting).then(
+            () => boardSnapshot.ref.delete()
+          ).then(
+            () => resolve(boardData)
+          );
+        });
       })
     );
   }
@@ -162,7 +174,7 @@ export class BoardService {
     );
   }
 
-  public readTaskList(taskListId: string): Observable<TaskListMetadata> {
+  public readTaskListMetadata(taskListId: string): Observable<TaskListMetadata> {
     return from(
       new Promise<TaskListMetadata>((resolve, reject) => {
         this.taskListsCollection.doc(taskListId).get().forEach(taskListSnapshot => {
@@ -352,6 +364,85 @@ export class BoardService {
           }
 
           resolve(taskData);
+        });
+      })
+    );
+  }
+
+  public loadPreviewList(): Observable<BoardMetadata[]> {
+    return from(
+      new Promise<BoardMetadata[]>((resolve, reject) => {
+        const userId = this.userMetadata?.id;
+        if (userId) {
+          const boards: BoardMetadata[] = [];
+          this.firestore.collection<BoardMetadata>('boards', ref => ref.where('members', '==', userId)).get().forEach(boardsQuery => {
+
+            boardsQuery.forEach(boardSnapshot => {
+              const boardData = boardSnapshot.data();
+
+              if (boardData) {
+                boards.push(boardData);
+              }
+            });
+          }).then(
+            () => resolve(boards),
+            () => reject()
+          );
+        }
+      })
+    );
+  }
+
+  public loadBoardContent(boardId: string): Observable<BoardContent> {
+    return from(
+      this.readBoardMetadata(boardId).toPromise().then(boardMetadata => {
+        const boardContent: BoardContent = {
+          admins: boardMetadata.admins,
+          id: boardMetadata.id,
+          members: boardMetadata.members,
+          name: boardMetadata.name,
+          owner: boardMetadata.owner,
+          taskLists: []
+        };
+
+        return {
+          boardContent,
+          boardMetadata
+        };
+      }).then(({ boardContent, boardMetadata }) => {
+        return new Promise<BoardContent>((resolve, reject) => {
+          const taskListsGetting: Promise<void>[] = [];
+          const taskGetting: Promise<void>[] = [];
+
+          boardMetadata.taskListsIds.forEach((taskListId, taskListIndex) => {
+            taskListsGetting.push(
+              this.readTaskListMetadata(taskListId).toPromise().then(taskListMetadata => {
+                boardContent.taskLists.push({
+                  boardId: taskListMetadata.boardId,
+                  id: taskListMetadata.id,
+                  name: taskListMetadata.name,
+                  pos: taskListMetadata.pos,
+                  tasks: []
+                });
+
+                taskListMetadata.tasksIds.forEach(taskId => {
+
+                  taskGetting.push(this.tasksCollection.doc(taskId).get().forEach(taskSnapshot => {
+                    const taskData = taskSnapshot.data();
+
+                    if (taskData) {
+                      boardContent.taskLists[taskListIndex].tasks.push(taskData);
+                    }
+                  }));
+                });
+
+              }));
+          });
+
+          Promise.all([...taskListsGetting, ...taskGetting]).then(
+            () => resolve(boardContent),
+            () => reject()
+          );
         });
       })
     );

@@ -3,6 +3,5 @@ export interface Task {
   pos: number;
   title: string;
   listId: string;
-  boardId: string;
   description: string;
 }

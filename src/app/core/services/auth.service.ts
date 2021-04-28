@@ -34,7 +34,7 @@ export class AuthService {
     });
   }
 
-  get firebaseUserData(): BehaviorSubject<firebase.User | null> {
+  get firebaseUserMetadata(): BehaviorSubject<firebase.User | null> {
     return this.firebaseUser$;
   }
 
@@ -110,7 +110,7 @@ export class AuthService {
 
   private setUserData(firebaseUser: firebase.User): Promise<void> {
     return this.afs.collection<UserMetadata>('users').doc(firebaseUser.uid).get().forEach(userDocSnapshot => {
-      const userData = {
+      const userMetadata = {
         id: firebaseUser.uid,
         email: firebaseUser.email,
         displayName: firebaseUser.displayName,
@@ -119,10 +119,10 @@ export class AuthService {
       };
 
       if (userDocSnapshot.exists) {
-        userDocSnapshot.ref.update(userData);
+        userDocSnapshot.ref.update(userMetadata);
       } else {
         userDocSnapshot.ref.set({
-          ...userData
+          ...userMetadata
         });
       }
     });
