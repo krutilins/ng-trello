@@ -19,7 +19,7 @@ export class VerifyEmailComponent implements OnInit {
 
   ngOnInit(): void {
     // tslint:disable-next-line: deprecation
-    this.authService.firebaseUserData.subscribe(firebaseUser => this.firebaseUser = firebaseUser);
+    this.authService.firebaseUserMetadata.subscribe(firebaseUser => this.firebaseUser = firebaseUser); // TODO: implement change detection ref
   }
 
   onSendVerificationEmail(): void {

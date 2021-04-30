@@ -78,7 +78,6 @@ export class BoardService {
       new Promise<BoardMetadata>((resolve, reject) => {
         this.boardsCollection.doc(boardId).get().forEach(boardSnapshot => {
           const boardData = boardSnapshot.data();
-
           if (!boardData) {
             return reject();
           }
@@ -156,21 +155,35 @@ export class BoardService {
     );
   }
 
-  public createTaskList(boardMetadata: BoardMetadata, name: string): Observable<TaskListMetadata> {
+  public createTaskList(boardId: string, name: string): Observable<TaskListMetadata> {
     return from(
       new Promise<TaskListMetadata>((resolve, reject) => {
-        const newTaskList: TaskListMetadata = {
-          id: uuid(),
-          name,
-          tasksIds: [],
-          boardId: boardMetadata.id,
-          pos: (boardMetadata.taskListsIds.length + 1) * this.DIFF_POS,
-        };
+        this.boardsCollection.doc(boardId).get().toPromise()
+          .then(boardSnapshot => boardSnapshot.data())
+          .then(boardData => {
+            if (boardData) {
+              const newTaskList: TaskListMetadata = {
+                id: uuid(),
+                name,
+                tasksIds: [],
+                boardId: boardData.id,
+                pos: (boardData.taskListsIds.length + 1) * this.DIFF_POS,
+              };
 
-        this.taskListsCollection.doc(newTaskList.id).set(newTaskList).then(
-          () => resolve(newTaskList),
-          () => reject()
-        );
+              this.taskListsCollection.doc(newTaskList.id).set(newTaskList).then(
+                () => this.boardsCollection.doc(boardData.id).set({
+                  ...boardData,
+                  taskListsIds: [...boardData.taskListsIds, newTaskList.id]
+                })
+              ).then(
+                () => resolve(newTaskList),
+                () => reject()
+              );
+
+            } else {
+              reject();
+            }
+          });
       })
     );
   }
@@ -274,12 +287,11 @@ export class BoardService {
             title,
             listId,
             description,
-            pos: taskListData.tasksIds.length * this.DIFF_POS
+            pos: (taskListData.tasksIds.length + 1) * this.DIFF_POS
           };
 
           this.tasksCollection.doc(newTask.id).set(newTask).then(
             () => {
-              taskListData.tasksIds.push(newTask.id);
               taskListSnapshot.ref.set({
                 tasksIds: [...taskListData.tasksIds, newTask.id]
               }, {
@@ -408,7 +420,7 @@ export class BoardService {
 
         return { boardMetadata, boardContent };
       }).then(({ boardMetadata, boardContent }) => {
-        const taskListsGetting: Promise<{ metadata: TaskListMetadata, index: number, boardContent: BoardContent }>[] = [];
+        const taskListsGetting: Promise<{ metadata: TaskListMetadata, index: number }>[] = [];
 
         boardMetadata.taskListsIds.forEach((taskListId, taskListIndex) => {
           taskListsGetting.push(
@@ -423,35 +435,40 @@ export class BoardService {
 
               return {
                 metadata: taskListMetadata,
-                index: taskListIndex,
-                boardContent
+                index: taskListIndex
               };
             }));
         });
 
-        return Promise.all(taskListsGetting);
-      }).then((lists) => {
-        const taskGetting: Promise<BoardContent>[] = [];
+        return Promise.all(taskListsGetting).then(receviedTaskLists => {
+          return {
+            boardContent,
+            receviedTaskLists
+          };
+        });
+      }).then(({ boardContent, receviedTaskLists }) => {
+        const taskGetting: Promise<void>[] = [];
 
-        lists.forEach(list => {
+        receviedTaskLists.forEach(list => {
           list.metadata.tasksIds.forEach(taskId => {
             taskGetting.push(
-              this.tasksCollection.doc(taskId).get().forEach(taskSnapshot => {
+              this.tasksCollection.doc(taskId).get().toPromise().then(taskSnapshot => {
                 const taskData = taskSnapshot.data();
 
                 if (taskData) {
-                  list.boardContent.taskLists[list.index].tasks.push(taskData);
+                  boardContent.taskLists[list.index].tasks.push(taskData);
                 }
 
-              }).then(
-                () => list.boardContent
-              )
+              })
             );
           });
         });
 
-        return Promise.all(taskGetting);
-      }).then((boardContents) => boardContents[0])
+        return Promise.all(taskGetting).then(() => {
+          boardContent.taskLists.forEach(taskList => taskList.tasks.sort((a, b) => a.pos - b.pos));
+          return boardContent;
+        });
+      })
     );
   }
 
@@ -486,7 +503,7 @@ export class BoardService {
         const [taskBefore, task, taskAfter, listBefore, listAfter] = responses;
 
         if (taskBefore && taskAfter) {
-          task.pos = (taskAfter.pos - taskBefore.pos) / 2;
+          task.pos = taskBefore.pos + (taskAfter.pos - taskBefore.pos) / 2;
         } else if (taskAfter) {
           task.pos = taskAfter.pos / 2;
         } else if (taskBefore) {
@@ -495,13 +512,17 @@ export class BoardService {
           task.pos = this.DIFF_POS;
         }
 
-        listBefore.tasksIds = listBefore.tasksIds.filter(taskId => taskId !== task.id);
+        if (listBefore.id !== listAfter.id) {
+          listBefore.tasksIds = listBefore.tasksIds.filter(taskId => taskId !== task.id);
+          listAfter.tasksIds.push(task.id);
 
-        listAfter.tasksIds.push(task.id);
+          task.listId = listAfter.id;
 
-        this.tasksCollection.doc(task.id).update(task);
-        this.taskListsCollection.doc(listBefore.id).update(listBefore);
-        this.taskListsCollection.doc(listAfter.id).update(listAfter);
+          this.taskListsCollection.doc(listBefore.id).set(listBefore);
+          this.taskListsCollection.doc(listAfter.id).set(listAfter);
+        }
+
+        this.tasksCollection.doc(task.id).set(task);
 
         return {
           task,

@@ -13,7 +13,7 @@ export class TaskListEffects {
   public createTaskList$ = createEffect(() => {
     return this.actions$.pipe(
       ofType(TaskListActions.taskListCreate),
-      mergeMap(action => this.boardService.createTaskList(action.boardMetadata, action.name).pipe(
+      mergeMap(action => this.boardService.createTaskList(action.boardId, action.name).pipe(
         map(taskListMetadata => TaskListActions.taskListCreateSuccess({ taskListMetadata })),
         catchError(errorMessage => of(TaskListActions.taskListCreateFailed({ errorMessage })))
       ))

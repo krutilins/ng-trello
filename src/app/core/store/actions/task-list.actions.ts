@@ -6,7 +6,7 @@ import { TaskListMetadata } from '../../models/task-list-metadata.model';
 
 export const taskListCreate = createAction(
   '[Task List] Task List Create',
-  props<{ boardMetadata: BoardMetadata, name: string }>()
+  props<{ boardId: string, name: string }>()
 );
 
 export const taskListCreateSuccess = createAction(

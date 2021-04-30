@@ -2,7 +2,7 @@ import { Component, ChangeDetectionStrategy, Input } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { TaskList } from 'src/app/core/models/task-list.model';
 import { TaskCreationDialogComponent } from '../task-creation-dialog/task-creation-dialog.component';
-import * as BoardActions from 'src/app/core/store/actions/board.actions';
+import * as TaskActions from 'src/app/core/store/actions/task.actions';
 
 @Component({
   selector: 'app-task-list',
@@ -25,15 +25,18 @@ export class TaskListComponent {
   }
 
   public openDialog(): void {
-    this.dialog.open(TaskCreationDialogComponent, {
-      width: '500px',
-      data: {
-        listID: this.list?.id,
-        title: '',
-        text: '',
-        type: BoardActions.taskCreate.type
-      }
-    });
+    if (this.list) {
+      this.dialog.open(TaskCreationDialogComponent, {
+        width: '500px',
+        data: {
+          title: '',
+          description: '',
+          listId: this.list.id,
+          type: TaskActions.taskCreate.type,
+          taskId: ''
+        }
+      });
+    }
   }
 
 }

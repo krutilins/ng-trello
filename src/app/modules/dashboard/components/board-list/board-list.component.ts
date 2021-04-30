@@ -2,12 +2,11 @@ import { Component, ChangeDetectionStrategy, ChangeDetectorRef, OnInit } from '@
 import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { BoardPreview } from 'src/app/core/models/board-preview.model';
-import { previewListLoad } from 'src/app/core/store/actions/board.actions';
+import { BoardMetadata } from 'src/app/core/models/board-metadata.model';
+import { previewListLoad } from 'src/app/core/store/actions/preview-list.actions';
 import { AppState } from 'src/app/core/store/models/app-state.model';
-import { selectPreviewList } from 'src/app/core/store/selectors/board.selectors';
 import { BoardCreationDialogComponent } from '../board-creation-dialog/board-creation-dialog.component';
-
+import { selectPreviewList } from 'src/app/core/store/selectors/preview-list.selectors';
 @Component({
   selector: 'app-board-list',
   templateUrl: './board-list.component.html',
@@ -16,7 +15,7 @@ import { BoardCreationDialogComponent } from '../board-creation-dialog/board-cre
 })
 export class BoardListComponent implements OnInit {
 
-  public boardPreviewList: BoardPreview[] = [];
+  public boardPreviewList: BoardMetadata[] = [];
 
   constructor(
     private dialog: MatDialog,
@@ -30,7 +29,7 @@ export class BoardListComponent implements OnInit {
   public ngOnInit(): void {
     // tslint:disable-next-line: deprecation
     this.store.select(selectPreviewList).subscribe(boardPreviewList => {
-      this.boardPreviewList = boardPreviewList.boardsPreview;
+      this.boardPreviewList = boardPreviewList;
       this.changeDetectorRef.detectChanges();
     });
   }

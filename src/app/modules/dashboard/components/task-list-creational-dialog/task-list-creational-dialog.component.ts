@@ -4,7 +4,7 @@ import { ErrorStateMatcher } from '@angular/material/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { Store } from '@ngrx/store';
 import { Task } from 'src/app/core/models/task.model';
-import * as BoardActions from 'src/app/core/store/actions/board.actions';
+import * as TaskListActions from 'src/app/core/store/actions/task-list.actions';
 import { AppState } from 'src/app/core/store/models/app-state.model';
 
 @Component({
@@ -14,7 +14,7 @@ import { AppState } from 'src/app/core/store/models/app-state.model';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class TaskListCreationalDialogComponent {
-  public taskListNameFormControl = new FormControl(this.data.taskListName, [
+  public taskListNameFormControl = new FormControl(this.data.name, [
     Validators.required,
   ]);
 
@@ -24,16 +24,16 @@ export class TaskListCreationalDialogComponent {
     private store: Store<AppState>,
     public dialogRef: MatDialogRef<TaskListCreationalDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: {
-      taskListName: string,
-      type: string,
-      taskListId: string,
+      name: string,
+      boardId: string,
+      listId: string,
       tasks: Task[],
-      parentBoardId: string
+      type: string,
     }
   ) { }
 
   public handleModalAction(): void {
-    if (this.data.type === BoardActions.taskListCreate.type) {
+    if (this.data.type === TaskListActions.taskListCreate.type) {
       this.handleCreateTaskList();
     } else {
       this.handleUpdateTaskList();
@@ -41,53 +41,44 @@ export class TaskListCreationalDialogComponent {
   }
 
   public handleCreateTaskList(): void {
-    this.store.dispatch(BoardActions.taskListCreate({
-      taskListName: this.data.taskListName,
-      boardId: this.data.taskListId
+    this.store.dispatch(TaskListActions.taskListCreate({
+      boardId: this.data.boardId,
+      name: this.data.name
     }));
 
     this.onClose();
   }
 
   public handleUpdateTaskList(): void {
-    this.store.dispatch(BoardActions.taskListUpdate({
-      taskList: {
-        id: this.data.taskListId,
-        name: this.data.taskListName,
-        tasks: this.data.tasks,
-        parentBoardId: this.data.parentBoardId
-      }
+    this.store.dispatch(TaskListActions.taskListNameChange({
+      newName: this.data.name,
+      taskListId: this.data.listId
     }));
 
     this.onClose();
   }
 
   public handleDeleteTaskList(): void {
-    this.store.dispatch(BoardActions.taskListDelete({
-      taskList: {
-        id: this.data.taskListId,
-        name: this.data.taskListName,
-        tasks: this.data.tasks,
-        parentBoardId: this.data.parentBoardId
-      }
+    this.store.dispatch(TaskListActions.taskListDelete({
+      taskListId: this.data.listId
     }));
 
     this.onClose();
   }
 
   public handleDisableSaveButton(): boolean {
-    return this.data.taskListName === '';
+    return this.data.name === '';
   }
 
   public handleDisableDeleteButton(): boolean {
-    return this.data.type === BoardActions.taskListCreate.type;
+    return this.data.type === TaskListActions.taskListCreate.type;
   }
 
   public onClose(): void {
     this.dialogRef.close();
   }
 
-  public onInputChange(field: 'taskListName', target: EventTarget | null): void {
+  public onInputChange(field: 'name', target: EventTarget | null): void {
     this.data[field] = (target as HTMLInputElement).value.trim();
   }
 }

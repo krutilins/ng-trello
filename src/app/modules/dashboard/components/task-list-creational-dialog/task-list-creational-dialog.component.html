@@ -12,8 +12,8 @@
         placeholder="Enter a task list name"
         [formControl]="taskListNameFormControl"
         [errorStateMatcher]="errorMatcher"
-        value="{{ data.taskListName }}"
-        (input)="onInputChange('taskListName', $event.target)"
+        value="{{ data.name }}"
+        (input)="onInputChange('name', $event.target)"
       />
       <mat-error *ngIf="taskListNameFormControl.hasError('required')">
         Enter a card title!

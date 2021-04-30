@@ -1,11 +1,9 @@
 import { Component, ChangeDetectionStrategy, Inject } from '@angular/core';
 import { FormControl, FormGroupDirective, NgForm, Validators } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
-import { v4 as uuidv4 } from 'uuid';
 import { Store } from '@ngrx/store';
 import { ErrorStateMatcher } from '@angular/material/core';
-import { Task } from 'src/app/core/models/task.model';
-import * as BoardActions from 'src/app/core/store/actions/board.actions';
+import * as TaskActions from 'src/app/core/store/actions/task.actions';
 import { AppState } from 'src/app/core/store/models/app-state.model';
 
 @Component({
@@ -32,13 +30,13 @@ export class TaskCreationDialogComponent {
       title: string,
       description: string,
       taskId: string,
-      parentListId: string,
+      listId: string,
       type: string,
     }
   ) { }
 
   public handleModalAction(): void {
-    if (this.data.type === BoardActions.taskCreate.type) {
+    if (this.data.type === TaskActions.taskCreate.type) {
       this.handleCreateTask();
     } else {
       this.handleUpdateTask();
@@ -46,24 +44,17 @@ export class TaskCreationDialogComponent {
   }
 
   public handleCreateTask(): void {
-    const newTask: Task = {
-      id: uuidv4(),
+    this.store.dispatch(TaskActions.taskCreate({
+      listId: this.data.listId,
       title: this.data.title,
-      description: this.data.description,
-      parentListId: this.data.parentListId
-    };
-
-    this.store.dispatch(BoardActions.taskCreate({
-      listId: this.data.parentListId,
-      newTask
+      description: this.data.description
     }));
 
     this.onClose();
   }
 
   public handleUpdateTask(): void {
-    this.store.dispatch(BoardActions.taskUpdate({
-      listId: this.data.parentListId,
+    this.store.dispatch(TaskActions.taskUpdate({
       taskId: this.data.taskId,
       title: this.data.title,
       description: this.data.description
@@ -73,8 +64,7 @@ export class TaskCreationDialogComponent {
   }
 
   public handleDeleteTask(): void {
-    this.store.dispatch(BoardActions.taskDelete({
-      parentListId: this.data.parentListId,
+    this.store.dispatch(TaskActions.taskDelete({
       taskId: this.data.taskId
     }));
 
@@ -86,7 +76,7 @@ export class TaskCreationDialogComponent {
   }
 
   public handleDisableDeleteButton(): boolean {
-    return this.data.type === BoardActions.taskCreate.type;
+    return this.data.type === TaskActions.taskCreate.type;
   }
 
   public onClose(): void {

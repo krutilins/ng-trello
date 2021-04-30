@@ -20,6 +20,9 @@ import { EffectsModule } from '@ngrx/effects';
 import { BoardEffects } from './core/store/effects/board.effects';
 import { reducer } from './core/store';
 import { StoreDevtoolsModule } from '@ngrx/store-devtools';
+import { PreviewListEffects } from './core/store/effects/preview-list.effects';
+import { TaskListEffects } from './core/store/effects/task-list.effects';
+import { TaskEffects } from './core/store/effects/task.effects';
 // import { reducer } from './core/store/reducers/card.reducer';
 
 @NgModule({
@@ -38,7 +41,7 @@ import { StoreDevtoolsModule } from '@ngrx/store-devtools';
     AngularFirestoreModule,
     AngularFireStorageModule,
     AngularFireModule.initializeApp(environment.firebase),
-    EffectsModule.forRoot([BoardEffects]),
+    EffectsModule.forRoot([BoardEffects, TaskListEffects, TaskEffects, PreviewListEffects]),
     StoreDevtoolsModule.instrument({
       maxAge: 25, // Retains last 25 states
       logOnly: environment.production, // Restrict extension to log-only mode

@@ -73,7 +73,7 @@ export const boardReducer = createReducer(
   on(TaskListActions.taskListCreateSuccess, (state, { taskListMetadata }) => {
     const newState = deepCopy(state);
 
-    const changedBoard = findChangedBoard(state.boards, taskListMetadata);
+    const changedBoard = findChangedBoard(newState.boards, taskListMetadata);
 
     if (changedBoard) {
       changedBoard.taskLists = [...changedBoard.taskLists, getTaskListFromMetadata(taskListMetadata)];
@@ -87,7 +87,7 @@ export const boardReducer = createReducer(
   on(TaskListActions.taskListDeleteSuccess, (state, { taskListMetadata }) => {
     const newState = deepCopy(state);
 
-    const changedBoard = findChangedBoard(state.boards, taskListMetadata);
+    const changedBoard = findChangedBoard(newState.boards, taskListMetadata);
 
     if (changedBoard) {
       changedBoard.taskLists = changedBoard.taskLists.filter(list => list.id !== taskListMetadata.id);
@@ -101,7 +101,7 @@ export const boardReducer = createReducer(
   on(TaskListActions.taskListNameChangeSuccess, (state, { taskListMetadata }) => {
     const newState = deepCopy(state);
 
-    const changedBoard = findChangedBoard(state.boards, taskListMetadata);
+    const changedBoard = findChangedBoard(newState.boards, taskListMetadata);
 
     if (changedBoard) {
       const changedTaskList = findChangedList(changedBoard.taskLists, taskListMetadata);
@@ -120,7 +120,7 @@ export const boardReducer = createReducer(
   on(TaskActions.taskCreateSuccess, (state, { task }) => {
     const newState = deepCopy(state);
 
-    const changedBoard = state.boards.find(board => board.taskLists.find(taskList => taskList.id === task.listId));
+    const changedBoard = newState.boards.find(board => board.taskLists.find(taskList => taskList.id === task.listId));
 
     const changedList = changedBoard?.taskLists.find(taskList => taskList.id === task.listId);
 
@@ -136,7 +136,7 @@ export const boardReducer = createReducer(
   on(TaskActions.taskDeleteSuccess, (state, { deletedTask }) => {
     const newState = deepCopy(state);
 
-    const changedBoard = state.boards.find(board => board.taskLists.find(taskList => taskList.id === deletedTask.listId));
+    const changedBoard = newState.boards.find(board => board.taskLists.find(taskList => taskList.id === deletedTask.listId));
 
     if (changedBoard) {
       const changedList = changedBoard.taskLists.find(taskList => taskList.id === deletedTask.listId);
@@ -155,7 +155,7 @@ export const boardReducer = createReducer(
     const newState = deepCopy(state);
 
     const changedBoard = newState.boards.find(board => {
-      return board.taskLists.find(taskList => taskList.id === action.listIdBefore && taskList.id === action.listIdAfter);
+      return board.taskLists.find(taskList => taskList.id === action.listIdBefore || taskList.id === action.listIdAfter);
     });
 
     if (changedBoard) {
@@ -164,7 +164,7 @@ export const boardReducer = createReducer(
       const after = getListByID(changedBoard.taskLists, action.listIdAfter);
 
       if (before) {
-        before.tasks.filter(task => task.id !== action.task.id);
+        before.tasks = before.tasks.filter(task => task.id !== action.task.id);
       }
 
       if (after) {
@@ -172,15 +172,16 @@ export const boardReducer = createReducer(
       }
     }
 
+
     return newState;
   }),
   on(TaskActions.taskDragFailed, (state, action) => ({
     ...state
   })),
   on(TaskActions.taskUpdateSuccess, (state, { changedTask }) => {
-    const changedBoard = state.boards.find(board => board.taskLists.find(taskList => taskList.id === changedTask.listId));
-
     const newState = deepCopy(state);
+
+    const changedBoard = newState.boards.find(board => board.taskLists.find(taskList => taskList.id === changedTask.listId));
 
     if (changedBoard) {
       const changedList = changedBoard.taskLists.find(taskList => taskList.id === changedTask.listId);

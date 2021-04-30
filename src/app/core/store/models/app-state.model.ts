@@ -5,5 +5,5 @@ import { UserState } from './user-state.model';
 export interface AppState { // TODO: implement user state
   board: BoardState;
   previewList: PreviewListState;
-  user: UserState;
+  // user: UserState;
 }

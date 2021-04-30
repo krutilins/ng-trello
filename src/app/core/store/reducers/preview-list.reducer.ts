@@ -7,7 +7,7 @@ const initialState: PreviewListState = {
   previewList: []
 };
 
-export const boardReducer = createReducer(
+export const previewlistReducer = createReducer(
   initialState,
   on(PreviewListActions.boardCreateSuccess, (state, { boardPreview }) => ({
     previewList: [...state.previewList, boardPreview]

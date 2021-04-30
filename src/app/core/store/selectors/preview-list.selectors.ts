@@ -4,7 +4,7 @@ import { PreviewListState } from '../models/preview-list-state.model';
 
 export const selectPreviewListState = (state: AppState): PreviewListState => state.previewList;
 
-export const selectBoardById = createSelector(
+export const selectPreviewList = createSelector(
   selectPreviewListState,
   (boardState: PreviewListState) => boardState.previewList
 );

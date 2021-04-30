@@ -6,5 +6,7 @@ export const selectBoardState = (state: AppState): BoardState => state.board;
 
 export const selectBoardById = createSelector(
   selectBoardState,
-  (boardState: BoardState, props: { boardId: string }) => boardState.boards.find(board => board.id === props.boardId)
+  (boardState: BoardState, props: { boardId: string }) => {
+    return boardState.boards.find(board => board.id === props.boardId);
+  }
 );

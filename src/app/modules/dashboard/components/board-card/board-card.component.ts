@@ -2,7 +2,7 @@ import { Component, ChangeDetectionStrategy, Input } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { Store } from '@ngrx/store';
 import { Task } from 'src/app/core/models/task.model';
-import * as BoardActions from 'src/app/core/store/actions/board.actions';
+import * as TaskActions from 'src/app/core/store/actions/task.actions';
 import { AppState } from 'src/app/core/store/models/app-state.model';
 import { TaskCreationDialogComponent } from '../task-creation-dialog/task-creation-dialog.component';
 
@@ -29,14 +29,14 @@ export class BoardCardComponent {
       id: '',
       title: '',
       description: '',
-      parentListId: ''
+      listId: '',
+      pos: 0
     };
   }
 
   public deleteCard(): void {
-    this.store.dispatch(BoardActions.taskDelete({
+    this.store.dispatch(TaskActions.taskDelete({
       taskId: this.task.id,
-      parentListId: this.task.parentListId
     }));
   }
 
@@ -54,11 +54,11 @@ export class BoardCardComponent {
     this.dialog.open(TaskCreationDialogComponent, {
       width: '500px',
       data: {
-        listId: this.task.parentListId,
+        listId: this.task.listId,
         taskId: this.task.id,
         title: this.task.title,
         description: this.task.description,
-        type: BoardActions.taskUpdate.type
+        type: TaskActions.taskUpdate.type
       }
     });
   }

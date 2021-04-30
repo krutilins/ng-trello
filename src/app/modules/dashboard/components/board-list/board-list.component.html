@@ -4,7 +4,7 @@
       <li
         class="board-preview-list__item"
         *ngFor="let boardPreview of boardPreviewList"
-        (click)="openBoard(boardPreview.boardContentId)"
+        (click)="openBoard(boardPreview.id)"
       >
         <span>{{ boardPreview.name }}</span>
       </li>

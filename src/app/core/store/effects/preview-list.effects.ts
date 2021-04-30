@@ -11,7 +11,7 @@ import { AppState } from '../models/app-state.model';
 @Injectable({
   providedIn: 'root'
 })
-export class TaskListEffects {
+export class PreviewListEffects {
 
   public createBoard$ = createEffect(() => {
     return this.actions$.pipe(
