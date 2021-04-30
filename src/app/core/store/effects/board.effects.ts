@@ -1,53 +1,39 @@
 import { Injectable } from '@angular/core';
 import { createEffect, Actions, ofType } from '@ngrx/effects';
 import { BoardService } from '../../services/board.service';
-import { catchError, map, mergeMap, tap } from 'rxjs/operators';
+import { catchError, map, mergeMap } from 'rxjs/operators';
 import * as BoardActions from '../actions/board.actions';
 import { of } from 'rxjs';
+import { Store } from '@ngrx/store';
+import { AppState } from '../models/app-state.model';
+import { deleteBoardPreviewSuccess } from '../actions/preview-list.actions';
 
 @Injectable()
 export class BoardEffects {
 
-  public boardContentLoad$ = createEffect(() => {
+  public loadBoardContent$ = createEffect(() => {
     return this.actions$.pipe(
       ofType(BoardActions.boardLoad),
-      mergeMap(action => this.boardService.loadBoard(action.boardId).pipe(
+      mergeMap(action => this.boardService.loadBoardContent(action.boardId).pipe(
         map(boardContent => BoardActions.boardLoadSuccess({ boardContent })),
         catchError(errorMessage => of(BoardActions.boardLoadFailed({ errorMessage })))
       ))
     );
   });
 
-  public boardCreate$ = createEffect(() => {
+  public deleteBoardContent$ = createEffect(() => {
     return this.actions$.pipe(
-      ofType(BoardActions.boardCreate),
-      mergeMap(action => this.boardService.createBoard(action.name).pipe(
-        map(board => BoardActions.boardCreateSuccess({ boardPreview: board })),
-        catchError(errorMessage => of(BoardActions.boardCreateFailed({ errorMessage })))
+      ofType(BoardActions.boardDelete),
+      mergeMap(action => this.boardService.deleteBoardMetadata(action.boardId).pipe(
+        map(boardMetadata => {
+          this.store.dispatch(deleteBoardPreviewSuccess({ boardId: boardMetadata.id }));
+          return BoardActions.boardDeleteSuccess({ boardMetadata });
+        }),
+        catchError(errorMessage => of(BoardActions.boardDeleteFailed({ errorMessage })))
       ))
     );
   });
 
-  public loadBoardPreviewList$ = createEffect(() => {
-    return this.actions$.pipe(
-      ofType(BoardActions.previewListLoad),
-      mergeMap(() => this.boardService.loadPreviewBoardList().pipe(
-        map(boardsPreview => BoardActions.previewListLoadSuccess({ boardsPreview })),
-        catchError(errorMessage => of(BoardActions.previewListLoadFailed({ errorMessage })))
-      ))
-    );
-  });
-
-  public updateBoardContet$ = createEffect(() => {
-    return this.actions$.pipe(
-      ofType(BoardActions.boardContentUpdate),
-      mergeMap(action => this.boardService.updateBoardContent(action.boardContent).pipe(
-        map(boardContent => BoardActions.boardContentUpdateSuccess({ boardContent })),
-        catchError(errorMessage => of(BoardActions.boardContentUpdate(errorMessage)))
-      ))
-    );
-  });
-
-  constructor(private actions$: Actions, private boardService: BoardService) { }
+  constructor(private actions$: Actions, private boardService: BoardService, private store: Store<AppState>) { }
 }
 

@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { AngularFirestore, AngularFirestoreCollection } from '@angular/fire/firestore';
-import { from, Observable } from 'rxjs';
+import { forkJoin, from, Observable, of, zip } from 'rxjs';
 import { AuthService } from './auth.service';
 import { v4 as uuid } from 'uuid';
 import { Task } from '../models/task.model';
@@ -8,6 +8,8 @@ import { BoardMetadata } from '../models/board-metadata.model';
 import { TaskListMetadata } from '../models/task-list-metadata.model';
 import { UserMetadata } from '../models/user-metadata.model';
 import { BoardContent } from '../models/board-content.model';
+import { TaskMovingInfo } from '../models/task-moving.info.model';
+import { map, take } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
@@ -328,7 +330,7 @@ export class BoardService {
 
   public updateTask(
     taskId: string,
-    taskUpdate: Partial<Pick<Task, 'description' | 'listId' | 'title' | 'pos'>>
+    taskUpdate: Partial<Pick<Task, 'description' | 'title'>>
   ): Observable<Task> {
     return from(
       new Promise<Task>((resolve, reject) => {
@@ -404,47 +406,111 @@ export class BoardService {
           taskLists: []
         };
 
-        return {
-          boardContent,
-          boardMetadata
-        };
-      }).then(({ boardContent, boardMetadata }) => {
-        return new Promise<BoardContent>((resolve, reject) => {
-          const taskListsGetting: Promise<void>[] = [];
-          const taskGetting: Promise<void>[] = [];
+        return { boardMetadata, boardContent };
+      }).then(({ boardMetadata, boardContent }) => {
+        const taskListsGetting: Promise<{ metadata: TaskListMetadata, index: number, boardContent: BoardContent }>[] = [];
 
-          boardMetadata.taskListsIds.forEach((taskListId, taskListIndex) => {
-            taskListsGetting.push(
-              this.readTaskListMetadata(taskListId).toPromise().then(taskListMetadata => {
-                boardContent.taskLists.push({
-                  boardId: taskListMetadata.boardId,
-                  id: taskListMetadata.id,
-                  name: taskListMetadata.name,
-                  pos: taskListMetadata.pos,
-                  tasks: []
-                });
+        boardMetadata.taskListsIds.forEach((taskListId, taskListIndex) => {
+          taskListsGetting.push(
+            this.readTaskListMetadata(taskListId).toPromise().then(taskListMetadata => {
+              boardContent.taskLists.push({
+                boardId: taskListMetadata.boardId,
+                id: taskListMetadata.id,
+                name: taskListMetadata.name,
+                pos: taskListMetadata.pos,
+                tasks: []
+              });
 
-                taskListMetadata.tasksIds.forEach(taskId => {
-
-                  taskGetting.push(this.tasksCollection.doc(taskId).get().forEach(taskSnapshot => {
-                    const taskData = taskSnapshot.data();
-
-                    if (taskData) {
-                      boardContent.taskLists[taskListIndex].tasks.push(taskData);
-                    }
-                  }));
-                });
-
-              }));
-          });
-
-          Promise.all([...taskListsGetting, ...taskGetting]).then(
-            () => resolve(boardContent),
-            () => reject()
-          );
+              return {
+                metadata: taskListMetadata,
+                index: taskListIndex,
+                boardContent
+              };
+            }));
         });
+
+        return Promise.all(taskListsGetting);
+      }).then((lists) => {
+        const taskGetting: Promise<BoardContent>[] = [];
+
+        lists.forEach(list => {
+          list.metadata.tasksIds.forEach(taskId => {
+            taskGetting.push(
+              this.tasksCollection.doc(taskId).get().forEach(taskSnapshot => {
+                const taskData = taskSnapshot.data();
+
+                if (taskData) {
+                  list.boardContent.taskLists[list.index].tasks.push(taskData);
+                }
+
+              }).then(
+                () => list.boardContent
+              )
+            );
+          });
+        });
+
+        return Promise.all(taskGetting);
+      }).then((boardContents) => boardContents[0])
+    );
+  }
+
+
+  public dragTask(
+    taskMovingInfo: TaskMovingInfo
+  ): Observable<{
+    task: Task,
+    listIdBefore: string,
+    listIdAfter: string
+  }> {
+    const observables: [
+      Observable<Task | null>,
+      Observable<Task>,
+      Observable<Task | null>,
+      Observable<TaskListMetadata>,
+      Observable<TaskListMetadata>
+    ] = [
+        taskMovingInfo.taskIdBefore ? this.readTask(taskMovingInfo.taskIdBefore) : of(null),
+        this.readTask(taskMovingInfo.taskId),
+        taskMovingInfo.taskIdAfter ? this.readTask(taskMovingInfo.taskIdAfter) : of(null),
+        this.readTaskListMetadata(taskMovingInfo.listIdBefore),
+        this.readTaskListMetadata(taskMovingInfo.listIdAfter)
+      ];
+
+
+    return forkJoin(
+      observables
+    ).pipe(
+      take(1),
+      map(responses => {
+        const [taskBefore, task, taskAfter, listBefore, listAfter] = responses;
+
+        if (taskBefore && taskAfter) {
+          task.pos = (taskAfter.pos - taskBefore.pos) / 2;
+        } else if (taskAfter) {
+          task.pos = taskAfter.pos / 2;
+        } else if (taskBefore) {
+          task.pos = taskBefore.pos + this.DIFF_POS;
+        } else {
+          task.pos = this.DIFF_POS;
+        }
+
+        listBefore.tasksIds = listBefore.tasksIds.filter(taskId => taskId !== task.id);
+
+        listAfter.tasksIds.push(task.id);
+
+        this.tasksCollection.doc(task.id).update(task);
+        this.taskListsCollection.doc(listBefore.id).update(listBefore);
+        this.taskListsCollection.doc(listAfter.id).update(listAfter);
+
+        return {
+          task,
+          listIdBefore: listBefore.id,
+          listIdAfter: listAfter.id
+        };
       })
     );
+
   }
 
 }

@@ -4,12 +4,7 @@ import { BoardState } from '../models/board-state.model';
 
 export const selectBoardState = (state: AppState): BoardState => state.board;
 
-export const selectBoardContent = createSelector(
+export const selectBoardById = createSelector(
   selectBoardState,
-  (boardState: BoardState) => boardState.boardContent
-);
-
-export const selectPreviewList = createSelector(
-  selectBoardState,
-  (boardState: BoardState) => boardState.previewList
+  (boardState: BoardState, props: { boardId: string }) => boardState.boards.find(board => board.id === props.boardId)
 );
