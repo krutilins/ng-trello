@@ -24,4 +24,8 @@ export class AuthPageComponent {
     this.router.navigate(['auth/sign-up']);
   }
 
+  redirectToDashboard(): void {
+    this.router.navigate(['dashboard']);
+  }
+
 }

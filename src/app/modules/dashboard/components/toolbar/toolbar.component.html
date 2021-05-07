@@ -1,0 +1,11 @@
+<mat-toolbar class="toolbar" color="primary">
+  <button
+    mat-icon-button
+    class="icon"
+    aria-label="Example icon-button with menu icon"
+    (click)="onToggleSidebar()"
+  >
+    <mat-icon>menu</mat-icon>
+  </button>
+  <app-profile [profile]="user | async"></app-profile>
+</mat-toolbar>

@@ -3,10 +3,10 @@
     <div class="authBlock">
       <h3>Thank You for Registering</h3>
 
-      <div class="formGroup" *ngIf="firebaseUser">
+      <div class="formGroup" *ngIf="(userMetadata | async) !== null">
         <p class="text-center">
           We have sent a confirmation email to
-          <strong>{{ firebaseUser.email }}</strong
+          <strong>{{ (userMetadata | async)?.email }}</strong
           >.
         </p>
         <p class="text-center">

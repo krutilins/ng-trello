@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 import { AngularFirestore, AngularFirestoreCollection } from '@angular/fire/firestore';
-import { forkJoin, from, Observable, of, zip } from 'rxjs';
-import { AuthService } from './auth.service';
+import { forkJoin, from, Observable, of } from 'rxjs';
 import { v4 as uuid } from 'uuid';
 import { Task } from '../models/task.model';
 import { BoardMetadata } from '../models/board-metadata.model';
@@ -10,6 +9,10 @@ import { UserMetadata } from '../models/user-metadata.model';
 import { BoardContent } from '../models/board-content.model';
 import { TaskMovingInfo } from '../models/task-moving.info.model';
 import { map, take } from 'rxjs/operators';
+import { AuthService } from './auth.service';
+import { Store } from '@ngrx/store';
+import { AppState } from '../store/models/app-state.model';
+import { selectUserMetadata } from '../store/selectors/user.selectors';
 
 @Injectable({
   providedIn: 'root'
@@ -24,20 +27,21 @@ export class BoardService {
 
   private DIFF_POS = 65536; // TODO: make a constant in another place
 
-  constructor(private firestore: AngularFirestore, private authService: AuthService) {
+  constructor(private firestore: AngularFirestore, private store: Store<AppState>) {
     this.boardsCollection = this.firestore.collection('boards');
     this.taskListsCollection = this.firestore.collection('taskLists');
     this.tasksCollection = this.firestore.collection('tasks');
     this.usersCollection = this.firestore.collection('users');
 
     // tslint:disable-next-line: deprecation
-    this.authService.firebaseUserMetadata.subscribe(firebaseUser => {
-      if (firebaseUser) {
-        this.usersCollection.doc(firebaseUser.uid).get().forEach(userSnapshot => {
+    this.store.select(selectUserMetadata).subscribe(userMetadata => {
+      if (userMetadata) {
+        this.usersCollection.doc(userMetadata.id).get().forEach(userSnapshot => {
           const userData = userSnapshot.data();
 
           if (userData) {
             this.userMetadata = userData;
+            console.log(this.userMetadata)
           }
         });
       }
@@ -382,25 +386,25 @@ export class BoardService {
     );
   }
 
-  public loadPreviewList(): Observable<BoardMetadata[]> {
+  public loadPreviewList(userMetadata: UserMetadata): Observable<BoardMetadata[]> {
     return from(
       new Promise<BoardMetadata[]>((resolve, reject) => {
-        const userId = this.userMetadata?.id;
+        const userId = userMetadata?.id;
         if (userId) {
           const boards: BoardMetadata[] = [];
-          this.firestore.collection<BoardMetadata>('boards', ref => ref.where('members', '==', userId)).get().forEach(boardsQuery => {
+          this.firestore.collection<BoardMetadata>('boards', ref => ref.where('members', 'array-contains', userId)).get().forEach(
+            boardsQuery => {
+              boardsQuery.forEach(boardSnapshot => {
+                const boardData = boardSnapshot.data();
 
-            boardsQuery.forEach(boardSnapshot => {
-              const boardData = boardSnapshot.data();
-
-              if (boardData) {
-                boards.push(boardData);
-              }
-            });
-          }).then(
-            () => resolve(boards),
-            () => reject()
-          );
+                if (boardData) {
+                  boards.push(boardData);
+                }
+              });
+            }).then(
+              () => resolve(boards),
+              () => reject()
+            );
         }
       })
     );

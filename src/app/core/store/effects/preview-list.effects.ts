@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
-import { mergeMap, map, catchError } from 'rxjs/operators';
+import { mergeMap, map, catchError, tap } from 'rxjs/operators';
 import { of } from 'rxjs';
 import * as PreviewListActions from '../actions/preview-list.actions';
 import { BoardService } from '../../services/board.service';
@@ -26,7 +26,7 @@ export class PreviewListEffects {
   public loadBoardPreviewList$ = createEffect(() => {
     return this.actions$.pipe(
       ofType(PreviewListActions.previewListLoad),
-      mergeMap(() => this.boardService.loadPreviewList().pipe(
+      mergeMap(action => this.boardService.loadPreviewList(action.userMetadata).pipe(
         map(boardsPreview => PreviewListActions.previewListLoadSuccess({ boardsPreview })),
         catchError(errorMessage => of(PreviewListActions.previewListLoadFailed({ errorMessage })))
       ))

@@ -1,0 +1,36 @@
+<ng-container *ngIf="profile !== null">
+  <div class="profile">
+    <div
+      class="profile__photo"
+      type="button"
+      cdkOverlayOrigin
+      #trigger="cdkOverlayOrigin"
+      (click)="toggleProfile()"
+    >
+      <img
+        src="{{
+          profile.photoURL
+            ? profile.photoURL
+            : 'https://sandstormit.com/wp-content/uploads/2018/09/incognito-2231825_960_720-1-300x300.png'
+        }}"
+      />
+    </div>
+
+    <ng-template
+      cdkConnectedOverlay
+      [cdkConnectedOverlayOrigin]="trigger"
+      [cdkConnectedOverlayOpen]="isOpen"
+    >
+      <ul class="list">
+        <li class="item">
+          {{ profile.displayName ? profile.displayName : "User has no name" }}
+        </li>
+        <li class="item">
+          <button mat-raised-button (click)="signOut()" color="primary">
+            Sign Out
+          </button>
+        </li>
+      </ul>
+    </ng-template>
+  </div>
+</ng-container>

@@ -7,12 +7,12 @@ import { AppState } from 'src/app/core/store/models/app-state.model';
 import { TaskCreationDialogComponent } from '../task-creation-dialog/task-creation-dialog.component';
 
 @Component({
-  selector: 'app-board-card',
-  templateUrl: './board-card.component.html',
-  styleUrls: ['./board-card.component.scss'],
+  selector: 'app-task',
+  templateUrl: './task.component.html',
+  styleUrls: ['./task.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class BoardCardComponent {
+export class TaskComponent {
 
   @Input()
   public index: number;

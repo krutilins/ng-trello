@@ -1,0 +1,42 @@
+<div class="wraper">
+  <div class="list">
+    <div
+      class="list-item"
+      routerLinkActive="active"
+      [routerLinkActiveOptions]="{ exact: true }"
+    >
+      <a routerLink="/dashboard" class="list-item-content">
+        <span>Boards</span>
+      </a>
+    </div>
+
+    <mat-divider class="divider"></mat-divider>
+
+    <div class="text">Boards List</div>
+
+    <ng-container *ngIf="boardPreviewList">
+      <div
+        class="list-item"
+        routerLinkActive="active"
+        *ngFor="let boardPreview of boardPreviewList"
+      >
+        <a [routerLink]="'board/' + boardPreview.id" class="list-item-content">
+          <span>{{ boardPreview.name }}</span>
+        </a>
+      </div>
+    </ng-container>
+
+    <div class="list-item">
+      <button
+        mat-fab
+        class="list-item-content"
+        class="icon"
+        aria-label="Icon-button with add icon"
+        (click)="openBoardCreationalDialog()"
+        color="primary"
+      >
+        <mat-icon class="icon">add</mat-icon>
+      </button>
+    </div>
+  </div>
+</div>
