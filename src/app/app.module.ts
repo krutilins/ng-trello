@@ -31,7 +31,7 @@ import { TaskEffects } from './core/store/effects/task.effects';
   ],
   imports: [
     FormsModule,
-    BrowserModule,
+    BrowserModule.withServerTransition({ appId: 'serverApp' }),
     AppRoutingModule,
     ReactiveFormsModule,
     BrowserAnimationsModule,
