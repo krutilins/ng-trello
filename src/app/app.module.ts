@@ -23,6 +23,8 @@ import { StoreDevtoolsModule } from '@ngrx/store-devtools';
 import { PreviewListEffects } from './core/store/effects/preview-list.effects';
 import { TaskListEffects } from './core/store/effects/task-list.effects';
 import { TaskEffects } from './core/store/effects/task.effects';
+import { UserEffects } from './core/store/effects/user.effects';
+import { HttpClientModule } from '@angular/common/http';
 // import { reducer } from './core/store/reducers/card.reducer';
 
 @NgModule({
@@ -33,6 +35,7 @@ import { TaskEffects } from './core/store/effects/task.effects';
     FormsModule,
     BrowserModule.withServerTransition({ appId: 'serverApp' }),
     AppRoutingModule,
+    HttpClientModule,
     ReactiveFormsModule,
     BrowserAnimationsModule,
     StoreModule.forRoot(reducer),
@@ -41,7 +44,7 @@ import { TaskEffects } from './core/store/effects/task.effects';
     AngularFirestoreModule,
     AngularFireStorageModule,
     AngularFireModule.initializeApp(environment.firebase),
-    EffectsModule.forRoot([BoardEffects, TaskListEffects, TaskEffects, PreviewListEffects]),
+    EffectsModule.forRoot([BoardEffects, TaskListEffects, TaskEffects, PreviewListEffects, UserEffects]),
     StoreDevtoolsModule.instrument({
       maxAge: 25, // Retains last 25 states
       logOnly: environment.production, // Restrict extension to log-only mode

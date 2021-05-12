@@ -1,8 +1,8 @@
-<div class="board-preview-list">
-  <ul class="board-preview-list__list">
+<div class="wraper">
+  <ul class="container">
     <ng-container *ngIf="boardPreviewList">
       <li
-        class="board-preview-list__item"
+        class="item"
         *ngFor="let boardPreview of boardPreviewList"
         (click)="openBoard(boardPreview.id)"
       >
@@ -10,14 +10,15 @@
       </li>
     </ng-container>
 
-    <li class="board-preview-list__item">
+    <li class="item">
       <button
-        mat-icon-button
-        class="icon"
+        mat-fab
+        class="button"
         aria-label="Icon-button with add icon"
         (click)="openBoardCreationalDialog()"
+        color="primary"
       >
-        <mat-icon>add</mat-icon>
+        <mat-icon class="icon">add</mat-icon>
       </button>
     </li>
   </ul>

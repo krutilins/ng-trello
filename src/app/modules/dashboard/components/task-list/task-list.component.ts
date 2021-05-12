@@ -3,6 +3,9 @@ import { MatDialog } from '@angular/material/dialog';
 import { TaskList } from 'src/app/core/models/task-list.model';
 import { TaskCreationDialogComponent } from '../task-creation-dialog/task-creation-dialog.component';
 import * as TaskActions from 'src/app/core/store/actions/task.actions';
+import { Store } from '@ngrx/store';
+import { AppState } from 'src/app/core/store/models/app-state.model';
+import { taskListDelete } from 'src/app/core/store/actions/task-list.actions';
 
 @Component({
   selector: 'app-task-list',
@@ -12,9 +15,10 @@ import * as TaskActions from 'src/app/core/store/actions/task.actions';
 })
 export class TaskListComponent {
 
-  @Input() public list: TaskList | null = null;
+  @Input()
+  public list: TaskList | null = null;
 
-  constructor(public dialog: MatDialog) { }
+  constructor(public dialog: MatDialog, public store: Store<AppState>) { }
 
   public getText(): string {
     return this.list?.tasks.length !== undefined && this.list.tasks.length > 0 ? 'Add another card' : 'Add a card';
@@ -37,6 +41,10 @@ export class TaskListComponent {
         }
       });
     }
+  }
+
+  public deleteList(taskListId: string): void {
+    this.store.dispatch(taskListDelete({ taskListId }));
   }
 
 }

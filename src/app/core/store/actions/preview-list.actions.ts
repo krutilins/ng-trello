@@ -1,5 +1,6 @@
 import { createAction, props } from '@ngrx/store';
 import { BoardMetadata } from '../../models/board-metadata.model';
+import { UserMetadata } from '../../models/user-metadata.model';
 
 // CREATE
 
@@ -21,7 +22,8 @@ export const boardCreateFailed = createAction(
 // LOAD
 
 export const previewListLoad = createAction(
-  '[Preview List] Preview LIst Load'
+  '[Preview List] Preview LIst Load',
+  props<{ userMetadata: UserMetadata }>()
 );
 
 export const previewListLoadSuccess = createAction(

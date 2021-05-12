@@ -1,6 +1,11 @@
 import { Component, OnInit, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
+import { FirebaseAuthService } from 'src/app/core/services/firebase-auth.service';
 import { AuthService } from 'src/app/core/services/auth.service';
-import firebase from 'firebase/app';
+import { Store } from '@ngrx/store';
+import { AppState } from 'src/app/core/store/models/app-state.model';
+import { selectUserMetadata } from 'src/app/core/store/selectors/user.selectors';
+import { UserMetadata } from 'src/app/core/models/user-metadata.model';
+import { Observable } from 'rxjs';
 
 @Component({
   selector: 'app-verify-email',
@@ -8,21 +13,16 @@ import firebase from 'firebase/app';
   styleUrls: ['./verify-email.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class VerifyEmailComponent implements OnInit {
+export class VerifyEmailComponent {
 
-  public firebaseUser: firebase.User | null = null;
+  public userMetadata: Observable<UserMetadata | null> = this.store.select(selectUserMetadata);
 
   constructor(
-    private authService: AuthService,
-    private changeDetectorRef: ChangeDetectorRef
+    private store: Store<AppState>,
+    private firebaseAuthService: FirebaseAuthService,
   ) { }
 
-  ngOnInit(): void {
-    // tslint:disable-next-line: deprecation
-    this.authService.firebaseUserMetadata.subscribe(firebaseUser => this.firebaseUser = firebaseUser); // TODO: implement change detection ref
-  }
-
-  onSendVerificationEmail(): void {
-    this.authService.sendVerificationMail();
+  public onSendVerificationEmail(): void {
+    this.firebaseAuthService.sendVerificationMail();
   }
 }

@@ -1,59 +1,32 @@
-<div class="displayTable">
-  <div class="displayTableCell">
-    <div class="authBlock">
-      <h3>Sign Up</h3>
+<div class="wrapper">
+  <div class="form-container">
+    <div class="header-text">Sign up</div>
+    <app-social-auth></app-social-auth>
+    <div class="form-text">Or sign up with email</div>
+    <form
+      class="form"
+      name="form"
+      [formGroup]="signUpFormGroup"
+      (ngSubmit)="onSubmit()"
+    >
+      <label for="email" class="label">Email </label>
+      <input type="text" name="email" formControlName="email" />
 
-      <div class="formGroup">
-        <input
-          type="email"
-          class="formControl"
-          placeholder="Email Address"
-          #userEmail
-          required
-        />
-      </div>
+      <label for="password" class="label">Password </label>
+      <input type="password" name="password" formControlName="password" />
 
-      <div class="formGroup">
-        <input
-          type="password"
-          class="formControl"
-          placeholder="Password"
-          #userPwd
-          required
-        />
-      </div>
+      <label for="password" class="label">Password repeat </label>
+      <input type="password" name="password" formControlName="passwordRepeat" />
 
-      <div class="formGroup">
-        <input
-          type="button"
-          class="btn btnPrimary"
-          value="Sign Up"
-          (click)="authService.signUp(userEmail.value, userPwd.value)"
-        />
-      </div>
-
-      <div class="formGroup">
-        <span class="or"><span class="orInner">Or</span></span>
-      </div>
-
-      <!-- Continue with Google -->
-      <div class="formGroup">
-        <button
-          type="button"
-          class="btn googleBtn"
-          (click)="authService.googleAuth()"
-        >
-          <i class="fab fa-google-plus-g"></i>
-          Continue with Google
-        </button>
-      </div>
-    </div>
-
-    <div class="redirectToLogin">
-      <span
-        >Already have an account?
-        <span class="redirect" routerLink="/auth/sign-in">Log In</span></span
-      >
+      <input
+        type="submit"
+        value="Get started"
+        [disabled]="!signUpFormGroup.valid"
+      />
+    </form>
+    <div class="have-account">
+      Have an account?
+      <span><a routerLink="/auth/sign-in">Sign in</a></span>
     </div>
   </div>
 </div>

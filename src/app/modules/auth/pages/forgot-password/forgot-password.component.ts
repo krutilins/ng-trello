@@ -1,5 +1,5 @@
 import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
-import { AuthService } from 'src/app/core/services/auth.service';
+import { FirebaseAuthService } from 'src/app/core/services/firebase-auth.service';
 
 @Component({
   selector: 'app-forgot-password',
@@ -10,7 +10,7 @@ import { AuthService } from 'src/app/core/services/auth.service';
 export class ForgotPasswordComponent implements OnInit {
 
   constructor(
-    public authService: AuthService
+    public authService: FirebaseAuthService
   ) { }
 
   ngOnInit(): void {

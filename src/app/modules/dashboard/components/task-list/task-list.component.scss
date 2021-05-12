@@ -16,6 +16,12 @@
   }
 }
 
+.actions {
+  display: flex;
+  flex-direction: row;
+
+}
+
 .title {
   padding: 4px 8px;
   font-weight: 500;

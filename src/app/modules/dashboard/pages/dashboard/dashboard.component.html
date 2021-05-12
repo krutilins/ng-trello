@@ -1,31 +1,9 @@
-<div class="dashboard">
-  <mat-toolbar class="dashboard__toolbar" color="primary">
-    <button
-      mat-icon-button
-      class="example-icon"
-      aria-label="Example icon-button with menu icon"
-    >
-      <mat-icon>menu</mat-icon>
-    </button>
-
-    <button
-      mat-icon-button
-      class="example-icon"
-      aria-label="Example icon-button with add icon"
-    >
-      <mat-icon>add</mat-icon>
-    </button>
-
-    <span class="example-spacer"></span>
-
-    <button
-      mat-icon-button
-      class="example-icon"
-      aria-label="Example icon with profile circle icon"
-    >
-      <mat-icon>account_circle</mat-icon>
-    </button>
-  </mat-toolbar>
-
-  <router-outlet></router-outlet>
-</div>
+<app-toolbar></app-toolbar>
+<mat-drawer-container class="dashboard" [hasBackdrop]="false">
+  <mat-drawer [opened]="open$ | async" mode="side">
+    <app-sidebar></app-sidebar>
+  </mat-drawer>
+  <mat-drawer-content>
+    <router-outlet></router-outlet>
+  </mat-drawer-content>
+</mat-drawer-container>
