@@ -1,5 +1,11 @@
-import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
+import { FirebaseAuthService } from 'src/app/core/services/firebase-auth.service';
 import { AuthService } from 'src/app/core/services/auth.service';
+import { Store } from '@ngrx/store';
+import { AppState } from 'src/app/core/store/models/app-state.model';
+import { selectUserMetadata } from 'src/app/core/store/selectors/user.selectors';
+import { UserMetadata } from 'src/app/core/models/user-metadata.model';
+import { Observable } from 'rxjs';
 
 @Component({
   selector: 'app-verify-email',
@@ -7,13 +13,16 @@ import { AuthService } from 'src/app/core/services/auth.service';
   styleUrls: ['./verify-email.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class VerifyEmailComponent implements OnInit {
+export class VerifyEmailComponent {
+
+  public userMetadata: Observable<UserMetadata | null> = this.store.select(selectUserMetadata);
 
   constructor(
-    public authService: AuthService
+    private store: Store<AppState>,
+    private firebaseAuthService: FirebaseAuthService,
   ) { }
 
-  ngOnInit(): void {
+  public onSendVerificationEmail(): void {
+    this.firebaseAuthService.sendVerificationMail();
   }
-
 }

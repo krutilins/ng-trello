@@ -1,0 +1,26 @@
+<div *ngIf="list !== null">
+  <h2 class="title">{{ list.name }}</h2>
+
+  <div class="container">
+    <app-task
+      cdkDrag
+      class="card"
+      *ngFor="let task of list.tasks; let index = index"
+      [index]="index"
+      [task]="task"
+    >
+    </app-task>
+  </div>
+
+  <div class="actions">
+    <button mat-button class="btn" color="primary" (click)="updateCard()">
+      <mat-icon>add</mat-icon>
+      {{ getText() }}
+    </button>
+
+    <button class="btn" mat-button color="warn" (click)="deleteList(list.id)">
+      <mat-icon>delete</mat-icon>
+      Delete
+    </button>
+  </div>
+</div>

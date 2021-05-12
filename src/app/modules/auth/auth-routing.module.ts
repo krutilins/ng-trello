@@ -5,6 +5,7 @@ import { ForgotPasswordComponent } from './pages/forgot-password/forgot-password
 import { SignInPageComponent } from './pages/sign-in-page/sign-in-page.component';
 import { SignUpPageComponent } from './pages/sign-up-page/sign-up-page.component';
 import { VerifyEmailComponent } from './pages/verify-email/verify-email.component';
+import { VkAuthComponent } from './components/vk-auth/vk-auth.component';
 
 const routes: Routes = [
   {
@@ -27,6 +28,10 @@ const routes: Routes = [
   {
     path: 'verify-email',
     component: VerifyEmailComponent
+  },
+  {
+    path: 'vk',
+    component: VkAuthComponent
   },
   {
     path: '**',

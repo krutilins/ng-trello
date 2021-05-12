@@ -1,6 +1,6 @@
 import { Component, ChangeDetectionStrategy } from '@angular/core';
-import { Router } from '@angular/router';
-import { AuthService } from 'src/app/core/services/auth.service';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FirebaseAuthService } from 'src/app/core/services/firebase-auth.service';
 
 @Component({
   selector: 'app-sign-in-page',
@@ -10,13 +10,26 @@ import { AuthService } from 'src/app/core/services/auth.service';
 })
 export class SignInPageComponent {
 
-  error: any;
+  public error: any;
+  public signInFormGroup: FormGroup;
 
   constructor(
-    public authService: AuthService
-  ) { }
+    private authService: FirebaseAuthService,
+    private formBuilder: FormBuilder
+  ) {
+    this.signInFormGroup = this.formBuilder.group({
+      email: ['', [Validators.required, Validators.email]],
+      password: ['', [Validators.required]]
+    });
+  }
 
-  signInGoogle(): void {
+  public onSubmit(): void {
+    const email = this.signInFormGroup.get('email')?.value;
+    const password = this.signInFormGroup.get('password')?.value;
+
+    if (email && password) {
+      this.authService.signIn(email, password)
+    }
 
   }
 }

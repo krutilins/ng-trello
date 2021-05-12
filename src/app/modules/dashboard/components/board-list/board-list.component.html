@@ -1,0 +1,25 @@
+<div class="wraper">
+  <ul class="container">
+    <ng-container *ngIf="boardPreviewList">
+      <li
+        class="item"
+        *ngFor="let boardPreview of boardPreviewList"
+        (click)="openBoard(boardPreview.id)"
+      >
+        <span>{{ boardPreview.name }}</span>
+      </li>
+    </ng-container>
+
+    <li class="item">
+      <button
+        mat-fab
+        class="button"
+        aria-label="Icon-button with add icon"
+        (click)="openBoardCreationalDialog()"
+        color="primary"
+      >
+        <mat-icon class="icon">add</mat-icon>
+      </button>
+    </li>
+  </ul>
+</div>

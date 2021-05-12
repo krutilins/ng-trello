@@ -8,6 +8,9 @@ import { SignUpPageComponent } from './pages/sign-up-page/sign-up-page.component
 import { SharedModule } from '../shared/shared.module';
 import { ForgotPasswordComponent } from './pages/forgot-password/forgot-password.component';
 import { VerifyEmailComponent } from './pages/verify-email/verify-email.component';
+import { ReactiveFormsModule } from '@angular/forms';
+import { SocialAuthComponent } from './components/social-auth/social-auth.component';
+import { VkAuthComponent } from './components/vk-auth/vk-auth.component';
 
 
 @NgModule({
@@ -16,12 +19,15 @@ import { VerifyEmailComponent } from './pages/verify-email/verify-email.componen
     SignInPageComponent,
     SignUpPageComponent,
     ForgotPasswordComponent,
-    VerifyEmailComponent
+    VerifyEmailComponent,
+    SocialAuthComponent,
+    VkAuthComponent
   ],
   imports: [
     SharedModule,
     CommonModule,
-    AuthRoutingModule
+    AuthRoutingModule,
+    ReactiveFormsModule
   ]
 })
 export class AuthModule { }

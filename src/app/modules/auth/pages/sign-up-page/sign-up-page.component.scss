@@ -1,3 +1,137 @@
 :host {
   display: block;
+  background: #f6f5f7;
+  font-family: "Nunito", sans-serif;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+}
+@import url("https://fonts.googleapis.com/css2?family=Mulish:wght@400;600;700;800&family=Roboto:wght@400;500;700&family=Noto+Sans:wght@400;700&display=swap");
+
+.wrapper {
+  max-width: 520px;
+  padding: 30px 25px;
+  margin: 2rem auto;
+  background: #fff;
+  border-radius: 10px;
+  height: 765px;
+}
+
+.form-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 25px 0;
+  height: 100%;
+
+  .header-text {
+    font-size: 24px;
+    font-weight: 700;
+    line-height: 28px;
+    margin-bottom: 20px;
+  }
+
+  .form-text {
+    text-transform: uppercase;
+    color: #949495;
+    position: relative;
+    margin-bottom: 20px;
+    &::before {
+      content: "";
+      width: 55px;
+      height: 1px;
+      background: #949495;
+      position: absolute;
+      left: -80px;
+      top: 50%;
+    }
+    &::after {
+      content: "";
+      width: 55px;
+      height: 1px;
+      background: #949495;
+      position: absolute;
+      right: -80px;
+      top: 50%;
+    }
+  }
+
+  .form {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    .label {
+      text-align: left;
+      margin-bottom: 5px;
+      font-size: 16px;
+      line-height: 18px;
+      font-weight: 700;
+    }
+
+    input[type="text"] {
+      box-sizing: border-box;
+      width: 337px;
+      height: 49px;
+      margin-bottom: 30px;
+      outline: none;
+      line-height: 20px;
+      font-size: 16px;
+      padding: 25px 22px;
+      border: 1px solid #d9dced;
+      border-radius: 5px;
+      font-family: "Mulish", sans-serif;
+
+      &:focus {
+        border: 1px solid #1f1c44;
+      }
+    }
+
+    input[type="password"] {
+      box-sizing: border-box;
+      width: 337px;
+      height: 49px;
+      margin-bottom: 30px;
+      outline: none;
+      line-height: 20px;
+      font-size: 16px;
+      padding: 25px 22px;
+      border: 1px solid #d9dced;
+      border-radius: 5px;
+      font-family: "Mulish", sans-serif;
+
+      &:focus {
+        border: 1px solid #1f1c44;
+      }
+    }
+
+    input[type="submit"] {
+      box-sizing: border-box;
+      width: 337px;
+      padding: 26px 0;
+      margin-bottom: 65px;
+      font-family: "Noto Sans", sans-serif;
+      outline-style: none;
+      border: none;
+      background: #09bb36;
+      box-shadow: 3px 5px 5px rgba(#07b123, 0.5);
+      border-radius: 5px;
+      font-size: 18px;
+      line-height: 22px;
+      color: #ffffff;
+      cursor: pointer;
+      transition: background 300ms ease-in-out;
+
+      &:hover {
+        background: rgba(#07b123, 0.8);
+        box-shadow: 3px 5px 5px rgba(#07b123, 0.5);
+      }
+    }
+  }
+
+  a {
+    text-decoration: none;
+    color: #5b86e6;
+  }
 }
