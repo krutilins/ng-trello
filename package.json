@@ -3,16 +3,17 @@
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
-    "start": "node server.js",
-    "build": "ng build",
+    "start": "npm run serve:ssr",
+    "build": "npm run build:ssr",
     "test": "ng test",
     "lint": "ng lint",
     "e2e": "ng e2e",
-    "dev:ssr": "ng run ng-ks-trello:serve-ssr",
-    "serve:ssr": "node dist/ng-ks-trello/server/main.js",
-    "build:ssr": "ng build --prod && ng run ng-ks-trello:server:production",
-    "prerender": "ng run ng-ks-trello:prerender",
-    "postinstall": "ng build:ssr"
+    "dev:ssr": "ng run three-days:serve-ssr",
+    "serve:ssr": "node dist/three-days/server/main.js",
+    "build:ssr": "ng build --prod && ng run three-days:server:production",
+    "build-weather-api": "node cors-handler-server/index.ts",
+    "prerender": "ng run three-days:prerender",
+    "heroku-postbuild": "npm run build:ssr"
   },
   "private": true,
   "dependencies": {
