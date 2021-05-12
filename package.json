@@ -3,17 +3,11 @@
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
-    "start": "npm run serve:ssr",
-    "build": "npm run build:ssr",
+    "start": "ng serve",
+    "build": "ng build",
     "test": "ng test",
     "lint": "ng lint",
-    "e2e": "ng e2e",
-    "dev:ssr": "ng run ng-ks-trello:serve-ssr",
-    "serve:ssr": "node dist/ng-ks-trello/server/main.js",
-    "build:ssr": "ng build --prod && ng run ng-ks-trello:server:production",
-    "build-weather-api": "node cors-handler-server/index.ts",
-    "prerender": "ng run ng-ks-trello:prerender",
-    "heroku-postbuild": "npm run build:ssr"
+    "e2e": "ng e2e"
   },
   "private": true,
   "dependencies": {
@@ -29,13 +23,10 @@
     "@angular/material": "^11.2.5",
     "@angular/platform-browser": "~11.2.5",
     "@angular/platform-browser-dynamic": "~11.2.5",
-    "@angular/platform-server": "~11.2.5",
     "@angular/router": "~11.2.5",
     "@ngrx/effects": "^11.1.0",
     "@ngrx/store": "^11.1.0",
     "@ngrx/store-devtools": "^11.1.0",
-    "@nguniversal/express-engine": "^11.2.1",
-    "express": "^4.15.2",
     "firebase": "^8.3.1",
     "rxjs": "~6.6.0",
     "tslib": "^2.0.0",
@@ -45,8 +36,6 @@
     "@angular-devkit/build-angular": "~0.1102.3",
     "@angular/cli": "~11.2.4",
     "@angular/compiler-cli": "~11.2.5",
-    "@nguniversal/builders": "^11.2.1",
-    "@types/express": "^4.17.0",
     "@types/jasmine": "~3.6.0",
     "@types/node": "^12.11.1",
     "@types/uuid": "^8.3.0",
@@ -63,9 +52,5 @@
     "tslint": "~6.1.0",
     "typescript": "~4.1.5",
     "uuid": "^8.3.2"
-  },
-  "engines": {
-    "node": "16.1.0",
-    "npm": "7.12.1"
   }
 }

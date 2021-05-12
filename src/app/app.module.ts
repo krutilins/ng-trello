@@ -33,7 +33,7 @@ import { HttpClientModule } from '@angular/common/http';
   ],
   imports: [
     FormsModule,
-    BrowserModule.withServerTransition({ appId: 'serverApp' }),
+    BrowserModule,
     AppRoutingModule,
     HttpClientModule,
     ReactiveFormsModule,
