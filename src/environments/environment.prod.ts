@@ -1,5 +1,5 @@
 export const environment = {
-  production: false,
+  production: true,
   firebase: {
     apiKey: 'AIzaSyAdeT0MeEke_ARCcS19YyIs9D4FmTmKqqM',
     authDomain: 'ng-trello-c4f4d.firebaseapp.com',
